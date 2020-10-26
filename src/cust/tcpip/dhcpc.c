@@ -96,7 +96,7 @@ struct dhcp_msg {
 
 static const u8_t xid[4] = {0xad, 0xde, 0x12, 0x23};
 static const u8_t magic_cookie[4] = {99, 130, 83, 99};
-static int8 hostname[8] = DEFAULT_DHCP_HOST_NAME;
+static int8 hostname[16] = DEFAULT_DHCP_HOST_NAME;
 static int lease_time_flag = 0;
 /*---------------------------------------------------------------------------*/
 static u8_t *

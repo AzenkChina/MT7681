@@ -48,13 +48,13 @@
 #if (ATCMD_RECOVERY_SUPPORT == 1)
 #define ENABLE_FLASH_SETTING    (1)   //must enable it in recovery mode to read boot index
 #else
-#define ENABLE_FLASH_SETTING    (1)
+#define ENABLE_FLASH_SETTING    (0)
 #endif
 
 /*Default setting of User Config Block*/
-#define DEFAULT_VENDOR_NEME          "Mediatek"
-#define DEFAULT_PRODUCT_TYPE         "IoT 1"
-#define DEFAULT_PRODUCT_NAME        "MT7681"
+#define DEFAULT_VENDOR_NEME          "Azenk"
+#define DEFAULT_PRODUCT_TYPE         "Proxy"
+#define DEFAULT_PRODUCT_NAME        "DLMSConnector"
 #define DEFAULT_DHCP_HOST_NAME    DEFAULT_PRODUCT_NAME
 
 
@@ -75,10 +75,10 @@
 #define DEFAULT_LOCAL_UDP_SRV_PORT  7681    /*The UDP  Port  if 7681 as a UDP server */
 
 #define DEFAULT_USE_DHCP                      1        /*0: Static IP,  1:Dynamic IP*/
-#define DEFAULT_STATIC_IP                     {192,168,0,99}
+#define DEFAULT_STATIC_IP                     {192,168,100,99}
 #define DEFAULT_SUBNET_MASK_IP         {255,255,255,0}
-#define DEFAULT_DNS_IP                          {192,168,0,1}
-#define DEFAULT_GATEWAY_IP                 {192,168,0,1}
+#define DEFAULT_DNS_IP                          {192,168,100,1}
+#define DEFAULT_GATEWAY_IP                 {192,168,100,1}
 #define DEFAULT_IOT_SERVER_IP             {182,148,123,91}
 #define DEFAULT_IOT_CMD_PWD               {0xFF,0xFF,0xFF,0xFF}
 

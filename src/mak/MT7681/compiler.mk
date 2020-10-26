@@ -28,7 +28,7 @@
 # TOOLCHAINS DEFINE
 #*******************************************************************************
 #For Linux TS
-TOOLCHAINS	=	/home/xxxx/AndesTools/nds32le-elf-newlib-v2j/bin
+TOOLCHAINS	=	/home/azenk/mt7681/compiler/bin
 
 #For Windows TS
 #TOOLCHAINS	=	/cygdrive/c/Andestech/BSPv310/toolchains/nds32le-elf-newlib-v2j/bin

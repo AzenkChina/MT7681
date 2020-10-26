@@ -245,7 +245,7 @@ FUNCFLAGS	+=	-DENABLE_DATAPARSING_SEQUENCE_MGMT=0
 #----UARTRX_TO_AIR_LEVEL
 #----1,handle uart rx data normaly,and send uart rx data which left in ring to air by peer query;
 #----2,do not handle uart rx data,only send uart rx data to air automatically
-FUNCFLAGS	+=	-DUARTRX_TO_AIR_LEVEL=1
+FUNCFLAGS	+=	-DUARTRX_TO_AIR_LEVEL=0
 
 # FEATURE FLAGS
 FUNCFLAGS	+=	-DXIP_ENABLE=1                #xip_ovly.h
@@ -258,6 +258,6 @@ FUNCFLAGS	+=	-DCFG_SUPPORT_4WAY_HS=1
 FUNCFLAGS	+=	-DCFG_SUPPORT_TCPIP=1
 FUNCFLAGS	+=	-DCFG_SUPPORT_DNS=0
 FUNCFLAGS	+=	-DCONFIG_STATION=1
-FUNCFLAGS	+=	-DCFG_SUPPORT_MTK_SMNT=1
+FUNCFLAGS	+=	-DCFG_SUPPORT_MTK_SMNT=0
 FUNCFLAGS	+=	-DHW_TIMER1_SUPPORT=1
 #END-OF-FILE#
