@@ -538,7 +538,7 @@ bool load_sta_cfg(void)
 	pIoTStaCfg->PassphaseLen = strlen("12345678");
 	pIoTStaCfg->AuthMode = Ndis802_11AuthModeWPA2PSK;
 
-        bFlashInit = TRUE;    /*if has valid setting in flash,  direct go Scan state, but not do smart connect*/
+	bFlashInit = TRUE;    /*if has valid setting in flash,  direct go Scan state, but not do smart connect*/
 #endif
 
     return bFlashInit;
