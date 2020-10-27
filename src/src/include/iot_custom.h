@@ -36,11 +36,11 @@
 #define        AT_CMD_MAX_LEN             (150)
 
 #if (ATCMD_RECOVERY_SUPPORT == 1)
-#define     FW_VERISON_CUST         "IoT_REC_V1.7.1"
+#define     FW_VERISON_CUST         "DLMSConnector 1.0 r1"
 #elif (CONFIG_SOFTAP == 1)
-#define     FW_VERISON_CUST         "IoT_AP_V1.7.1"
+#define     FW_VERISON_CUST         "DLMSConnector 1.0 r1"
 #else
-#define     FW_VERISON_CUST         "IoT_STA_V1.7.1"
+#define     FW_VERISON_CUST         "DLMSConnector 1.0 r1"
 #endif
 
 
@@ -69,17 +69,17 @@
 #define DEFAULT_UART_STOP_BITS           sb_1
 
 #define DEFAULT_TCP_UDP_CS                  1       /*0: UDP,  1:TCP  (Default 3*Client, 1*Server is Open)*/
-#define DEFAULT_IOT_TCP_SRV_PORT      7681    /*The IoT Server TCP Port  in the internet */
-#define DEFAULT_LOCAL_TCP_SRV_PORT  7681    /*The TCP Port  if 7681 as a TCP server */
-#define DEFAULT_IOT_UDP_SRV_PORT      7681    /*The IoT Server UDP Port  in the internet */
-#define DEFAULT_LOCAL_UDP_SRV_PORT  7681    /*The UDP  Port  if 7681 as a UDP server */
+#define DEFAULT_IOT_TCP_SRV_PORT      4059    /*The IoT Server TCP Port  in the internet */
+#define DEFAULT_LOCAL_TCP_SRV_PORT  4059    /*The TCP Port  if 7681 as a TCP server */
+#define DEFAULT_IOT_UDP_SRV_PORT      4059    /*The IoT Server UDP Port  in the internet */
+#define DEFAULT_LOCAL_UDP_SRV_PORT  4059    /*The UDP  Port  if 7681 as a UDP server */
 
 #define DEFAULT_USE_DHCP                      1        /*0: Static IP,  1:Dynamic IP*/
-#define DEFAULT_STATIC_IP                     {192,168,100,99}
+#define DEFAULT_STATIC_IP                     {192,168,100,80}
 #define DEFAULT_SUBNET_MASK_IP         {255,255,255,0}
 #define DEFAULT_DNS_IP                          {192,168,100,1}
 #define DEFAULT_GATEWAY_IP                 {192,168,100,1}
-#define DEFAULT_IOT_SERVER_IP             {182,148,123,91}
+#define DEFAULT_IOT_SERVER_IP             {192,168,100,1}
 #define DEFAULT_IOT_CMD_PWD               {0xFF,0xFF,0xFF,0xFF}
 
 

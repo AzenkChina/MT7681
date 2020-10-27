@@ -125,6 +125,7 @@ void iot_cust_scan_done(void)
     /* Example for customer's smart connection implementation*/
 #if (CFG_SUPPORT_MTK_SMNT == 0)
 #ifdef PMK_CAL_BY_SW
+#if (ATCMD_RECOVERY_SUPPORT == 0)
     /*Calcurate PMK by 7681 software, it will spend 6sec*/
     if (pIoTStaCfg->AuthMode >= Ndis802_11AuthModeWPA)  {
         /*Deriver PMK by AP 's SSID and Password*/
@@ -137,6 +138,7 @@ void iot_cust_scan_done(void)
         //printf_high("keyMaterial:");
         //dump(keyMaterial, 40);
     }
+#endif
 #endif
 #endif
 
@@ -155,7 +157,25 @@ void iot_cust_scan_done(void)
 ========================================================================*/
 void iot_cust_subtask1(void)
 {
-
+	/* example: make GPIO 4 blinking every 1 second */
+	static uint32 subPreTimer = 0;
+	static uint32 subCurTimer = 0;
+	uint8 input, polarity;
+	/* get current counter value (unit:1ms) */
+	subCurTimer = iot_get_ms_time();
+#ifdef CONFIG_SOFTAP
+	/* if the time difference is 2000ms, change gpio output value*/
+	if (subCurTimer - subPreTimer >= 500)
+	{
+#else
+	/* if the time difference is 2000ms, change gpio output value*/
+	if (subCurTimer - subPreTimer >= 2000)
+	{
+#endif
+		subPreTimer = subCurTimer;
+		iot_gpio_read(4, &input, &polarity); /*get gpio mode and value*/
+		iot_gpio_output(4, (input+1)%2); /*change gpio to output mode with the reversed value*/
+	}
 }
 
 /*========================================================================
@@ -203,6 +223,7 @@ void iot_cust_init(void)
 		{
 			if(IoTpAd.flash_rw_buf[FLASH_COM_CFG_BOOT_IDX] != 1)
 			{
+				printf_high("Switching to AP mode...");
 				spi_flash_erase_sector(FLASH_COM_CFG_BASE);
 				memset(IoTpAd.flash_rw_buf ,0xff, sizeof(IoTpAd.flash_rw_buf));
 
@@ -215,12 +236,14 @@ void iot_cust_init(void)
 				IoTpAd.flash_rw_buf[FLASH_COM_CFG_RECOVERY_MODE_STATUS]	= DEFAULT_RECOVERY_MODE_STATUS;
 				IoTpAd.flash_rw_buf[FLASH_COM_CFG_IO_SET]				= DEFAULT_IO_MODE;
 				spi_flash_write(FLASH_COM_CFG_BASE, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
+				printf_high("Done\n");
 			}
 		}
 		else
 		{
 			if(IoTpAd.flash_rw_buf[FLASH_COM_CFG_BOOT_IDX] != DEFAULT_BOOT_FW_IDX)
 			{
+				printf_high("Switching to STA mode...");
 				spi_flash_erase_sector(FLASH_COM_CFG_BASE);
 				memset(IoTpAd.flash_rw_buf ,0xff, sizeof(IoTpAd.flash_rw_buf));
 
@@ -233,11 +256,13 @@ void iot_cust_init(void)
 				IoTpAd.flash_rw_buf[FLASH_COM_CFG_RECOVERY_MODE_STATUS]	= DEFAULT_RECOVERY_MODE_STATUS;
 				IoTpAd.flash_rw_buf[FLASH_COM_CFG_IO_SET]				= DEFAULT_IO_MODE;
 				spi_flash_write(FLASH_COM_CFG_BASE, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
+				printf_high("Done\n");
 			}
 		}
 	}
 	else
 	{
+		printf_high("Making default to STA mode...");
 		spi_flash_erase_sector(FLASH_COM_CFG_BASE);
 		memset(IoTpAd.flash_rw_buf ,0xff, sizeof(IoTpAd.flash_rw_buf));
 
@@ -250,6 +275,7 @@ void iot_cust_init(void)
 		IoTpAd.flash_rw_buf[FLASH_COM_CFG_RECOVERY_MODE_STATUS]	= DEFAULT_RECOVERY_MODE_STATUS;
 		IoTpAd.flash_rw_buf[FLASH_COM_CFG_IO_SET]				= DEFAULT_IO_MODE;
 		spi_flash_write(FLASH_COM_CFG_BASE, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
+		printf_high("Done\n");
 	}
 #endif
 }
@@ -268,12 +294,14 @@ void iot_cust_init(void)
 /* Sample code for custom SubTask and Timer */
 void cust_subtask(void)
 {
+#ifndef CONFIG_STATION
     /* The Task to Handle the AT Command */
 #if (ATCMD_SUPPORT == 1)
 #if (UART_INTERRUPT == 1)
     uart_rx_dispatch();
 #else
     iot_atcmd_hdlr();
+#endif
 #endif
 #endif
 
@@ -728,6 +756,20 @@ bool load_com_cfg(void)
         IoTpAd.ComCfg.BootFWIdx            =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_BOOT_IDX];
         IoTpAd.ComCfg.RecovModeStatus     =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_RECOVERY_MODE_STATUS];
         IoTpAd.ComCfg.IOMode            =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_IO_SET];
+
+#ifdef CONFIG_STATION
+        memcpy(&IoTpAd.ComCfg.UART_Baudrate, &IoTpAd.flash_rw_buf[FLASH_COM_CFG_UART_BAUD],   FLASH_COM_CFG_UART_BAUD_LEN);
+        IoTpAd.ComCfg.UART_DataBits    =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_UART_DATA_BITS];
+        IoTpAd.ComCfg.UART_Parity     =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_UART_PARITY];
+        IoTpAd.ComCfg.UART_StopBits    =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_UART_STOP_BITS];
+
+        if ((IoTpAd.ComCfg.UART_Baudrate > UART_BAUD_3200000) ||
+            (IoTpAd.ComCfg.UART_Parity > pa_space) ||
+            ((IoTpAd.ComCfg.UART_DataBits < len_5) || (IoTpAd.ComCfg.UART_DataBits > len_8))  ||
+            ((IoTpAd.ComCfg.UART_StopBits < sb_1)  || (IoTpAd.ComCfg.UART_StopBits > sb_1_5)) ) {
+            default_uart_cfg();
+        }
+#endif
     }
 #endif
 

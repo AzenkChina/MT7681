@@ -53,7 +53,6 @@ extern IOT_ADAPTER       IoTpAd;
 extern MLME_STRUCT      *pIoTMlme;
 
 struct timer periodic_timer, arp_timer, cli_timer;
-int cli_fd = -1;
 static clock_time_t clk = CLOCK_SECOND;
 /*---------------------------------------------------------------------------*/
 int
@@ -118,7 +117,6 @@ _tcpip_init(void)
         dhcpc_set_state(STATE_CONFIG_DONE);
     }
 #endif
-    cli_fd = -1;
     return 0;
 }
 
@@ -206,22 +204,6 @@ void tcpip_periodic_timer()
     if (timer_expired(&cli_timer)) {
         clk = (clk > (CLOCK_SECOND*60))?clk:(clk*2);
         timer_set(&cli_timer, clk);
-
-        if ((cli_fd == -1) &&
-            memcmp(uip_hostaddr, 0x00000000, sizeof(uip_hostaddr))) {
-            UIP_CONN *conn = NULL;
-            uip_ipaddr_t srv_ip;
-
-            uip_ipaddr(srv_ip, IoTpAd.ComCfg.IoT_ServeIP[0], IoTpAd.ComCfg.IoT_ServeIP[1],
-                       IoTpAd.ComCfg.IoT_ServeIP[2], IoTpAd.ComCfg.IoT_ServeIP[3]);
-            conn = uip_connect(&srv_ip, HTONS(IoTpAd.ComCfg.IoT_TCP_Srv_Port));
-            if (conn) {
-                conn->lport = HTONS(7682);
-                cli_fd = conn->fd;
-            } else {
-                printf("connect fail\n");
-            }
-        }
     }
 }
 /*---------------------------------------------------------------------------*/
