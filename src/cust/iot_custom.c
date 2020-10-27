@@ -223,7 +223,6 @@ void iot_cust_init(void)
 		{
 			if(IoTpAd.flash_rw_buf[FLASH_COM_CFG_BOOT_IDX] != 1)
 			{
-				printf_high("Switching to AP mode...");
 				spi_flash_erase_sector(FLASH_COM_CFG_BASE);
 				memset(IoTpAd.flash_rw_buf ,0xff, sizeof(IoTpAd.flash_rw_buf));
 
@@ -236,14 +235,12 @@ void iot_cust_init(void)
 				IoTpAd.flash_rw_buf[FLASH_COM_CFG_RECOVERY_MODE_STATUS]	= DEFAULT_RECOVERY_MODE_STATUS;
 				IoTpAd.flash_rw_buf[FLASH_COM_CFG_IO_SET]				= DEFAULT_IO_MODE;
 				spi_flash_write(FLASH_COM_CFG_BASE, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
-				printf_high("Done\n");
 			}
 		}
 		else
 		{
 			if(IoTpAd.flash_rw_buf[FLASH_COM_CFG_BOOT_IDX] != DEFAULT_BOOT_FW_IDX)
 			{
-				printf_high("Switching to STA mode...");
 				spi_flash_erase_sector(FLASH_COM_CFG_BASE);
 				memset(IoTpAd.flash_rw_buf ,0xff, sizeof(IoTpAd.flash_rw_buf));
 
@@ -256,13 +253,11 @@ void iot_cust_init(void)
 				IoTpAd.flash_rw_buf[FLASH_COM_CFG_RECOVERY_MODE_STATUS]	= DEFAULT_RECOVERY_MODE_STATUS;
 				IoTpAd.flash_rw_buf[FLASH_COM_CFG_IO_SET]				= DEFAULT_IO_MODE;
 				spi_flash_write(FLASH_COM_CFG_BASE, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
-				printf_high("Done\n");
 			}
 		}
 	}
 	else
 	{
-		printf_high("Making default to STA mode...");
 		spi_flash_erase_sector(FLASH_COM_CFG_BASE);
 		memset(IoTpAd.flash_rw_buf ,0xff, sizeof(IoTpAd.flash_rw_buf));
 
@@ -275,7 +270,6 @@ void iot_cust_init(void)
 		IoTpAd.flash_rw_buf[FLASH_COM_CFG_RECOVERY_MODE_STATUS]	= DEFAULT_RECOVERY_MODE_STATUS;
 		IoTpAd.flash_rw_buf[FLASH_COM_CFG_IO_SET]				= DEFAULT_IO_MODE;
 		spi_flash_write(FLASH_COM_CFG_BASE, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
-		printf_high("Done\n");
 	}
 #endif
 }
@@ -756,7 +750,7 @@ bool load_com_cfg(void)
         IoTpAd.ComCfg.IOMode            =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_IO_SET];
 
 #ifdef CONFIG_STATION
-#if( ATCMD_RECOVERY_SUPPORT = 0 )
+#if( ATCMD_RECOVERY_SUPPORT == 0 )
         memcpy(&IoTpAd.ComCfg.UART_Baudrate, &IoTpAd.flash_rw_buf[FLASH_COM_CFG_UART_BAUD],   FLASH_COM_CFG_UART_BAUD_LEN);
         IoTpAd.ComCfg.UART_DataBits    =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_UART_DATA_BITS];
         IoTpAd.ComCfg.UART_Parity     =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_UART_PARITY];
