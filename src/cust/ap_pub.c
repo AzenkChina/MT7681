@@ -10,7 +10,7 @@
 #define AP_MODE_WPA1WPA2PSK_TKIPAESMIX   3
 
 #define DEFAULT_AP_MODE    AP_MODE_WPA1WPA2PSK_TKIPAESMIX
-#define Default_Ssid               "MT7681_AP1"
+#define Default_Ssid               "DLMSConnector"
 #define Default_Password      "12345678"
 
 extern AP_ADMIN_CONFIG  *pIoTApCfg;
