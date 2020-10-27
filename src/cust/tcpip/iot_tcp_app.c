@@ -168,10 +168,8 @@ handle_tcp_app(void)
     if (uip_newdata()) {
         printf("RX fd : %d\n", uip_conn->fd);
         if (lport == IoTpAd.ComCfg.Local_TCP_Srv_Port) {
-#if ENABLE_DATAPARSING_SEQUENCE_MGMT
-            iot_app_proc_pkt(uip_conn->fd, uip_appdata,uip_datalen());
-#else
-            iot_app_proc_pkt(uip_appdata,uip_datalen());
+#if (UART_SUPPORT ==1)
+            iot_uart_output(uip_appdata, (int16)uip_datalen());
 #endif
 #if CFG_SUPPORT_TCPIP_ROBUST_TEST
         } else if (lport==7684) {
@@ -192,6 +190,13 @@ handle_tcp_app(void)
         } else if (s->len > 0) {
             uip_send(s->buf, s->len);
             s->state = IOT_APP_S_DATA_SEND;
+        }
+#endif
+#if (ATCMD_SUPPORT == 0)
+        if (s->state == IOT_APP_S_CLOSED) {
+            uip_close();
+        } else {
+			//...
         }
 #endif
     }

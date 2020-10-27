@@ -200,6 +200,17 @@ void uart_rx_cb(void)
 #endif
 
     /*
+     * MCU only forward uart rx data to client
+     * here,copy to rx ring and return
+     */
+#if (ATCMD_SUPPORT == 0)
+    while (uart_get_byte(&ch)) {
+        Buf_Push(rx_ring,ch);
+    }
+    return;
+#endif
+
+    /*
      * MCU should collect data to be packet
      */
     //normal case

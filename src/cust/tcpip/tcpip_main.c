@@ -52,7 +52,7 @@
 extern IOT_ADAPTER       IoTpAd;
 extern MLME_STRUCT      *pIoTMlme;
 
-struct timer periodic_timer, arp_timer, cli_timer;
+struct timer periodic_timer, arp_timer;
 static clock_time_t clk = CLOCK_SECOND;
 /*---------------------------------------------------------------------------*/
 int
@@ -76,7 +76,6 @@ _tcpip_init(void)
 
     timer_set(&periodic_timer, CLOCK_SECOND/2);
     timer_set(&arp_timer, CLOCK_SECOND * 10);
-    timer_set(&cli_timer, CLOCK_SECOND);
 
     mt76xx_dev_init();
     uip_init();
@@ -199,11 +198,6 @@ void tcpip_periodic_timer()
 #if UIP_CLOUD_SERVER_SUPPORT
 		cloud_tcp_conn_check();
 #endif
-    }
-
-    if (timer_expired(&cli_timer)) {
-        clk = (clk > (CLOCK_SECOND*60))?clk:(clk*2);
-        timer_set(&cli_timer, clk);
     }
 }
 /*---------------------------------------------------------------------------*/

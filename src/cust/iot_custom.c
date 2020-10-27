@@ -769,6 +769,10 @@ bool load_com_cfg(void)
         }
 #endif
     }
+	else
+	{
+        reset_com_cfg(TRUE);
+    }
 #endif
 
     return TRUE;
