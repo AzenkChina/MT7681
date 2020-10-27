@@ -756,6 +756,7 @@ bool load_com_cfg(void)
         IoTpAd.ComCfg.IOMode            =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_IO_SET];
 
 #ifdef CONFIG_STATION
+#if( ATCMD_RECOVERY_SUPPORT = 0 )
         memcpy(&IoTpAd.ComCfg.UART_Baudrate, &IoTpAd.flash_rw_buf[FLASH_COM_CFG_UART_BAUD],   FLASH_COM_CFG_UART_BAUD_LEN);
         IoTpAd.ComCfg.UART_DataBits    =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_UART_DATA_BITS];
         IoTpAd.ComCfg.UART_Parity     =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_UART_PARITY];
@@ -768,9 +769,10 @@ bool load_com_cfg(void)
             default_uart_cfg();
         }
 #endif
+#endif
     }
-	else
-	{
+    else
+    {
         reset_com_cfg(TRUE);
     }
 #endif
