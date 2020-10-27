@@ -182,6 +182,76 @@ void iot_cust_preinit(void)
 void iot_cust_init(void)
 {
     /* run customer initial function */
+
+#if (ATCMD_RECOVERY_SUPPORT==0)
+	uint8 i=0;
+	uint32 loop;
+	uint32 gpio_input[3]={0,0,0};
+
+	/*GPIO get status*/
+    for (i=0; i<=3; i++) {
+		for (loop=0; loop<=10000; loop++);
+		iot_gpio_input((int32)3, &gpio_input[i]);
+    }
+
+	/* read settings stored on flash Common CONFIG BLOCK */
+	spi_flash_read(FLASH_COM_CFG_BASE, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
+
+	if(IoTpAd.flash_rw_buf[FLASH_COM_CFG_INFO_STORED] == COMMON_INFO_STORED)
+	{
+		if((gpio_input[0] == 1) && (gpio_input[1] == 1) && (gpio_input[2] == 1))
+		{
+			if(IoTpAd.flash_rw_buf[FLASH_COM_CFG_BOOT_IDX] != 1)
+			{
+				spi_flash_erase_sector(FLASH_COM_CFG_BASE);
+				memset(IoTpAd.flash_rw_buf ,0xff, sizeof(IoTpAd.flash_rw_buf));
+
+				default_boot_cfg();
+				default_uart_cfg();
+				default_ip_cfg();
+
+				IoTpAd.flash_rw_buf[FLASH_COM_CFG_INFO_STORED]			= COMMON_INFO_STORED;
+				IoTpAd.flash_rw_buf[FLASH_COM_CFG_BOOT_IDX]				= 1;
+				IoTpAd.flash_rw_buf[FLASH_COM_CFG_RECOVERY_MODE_STATUS]	= DEFAULT_RECOVERY_MODE_STATUS;
+				IoTpAd.flash_rw_buf[FLASH_COM_CFG_IO_SET]				= DEFAULT_IO_MODE;
+				spi_flash_write(FLASH_COM_CFG_BASE, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
+			}
+		}
+		else
+		{
+			if(IoTpAd.flash_rw_buf[FLASH_COM_CFG_BOOT_IDX] != DEFAULT_BOOT_FW_IDX)
+			{
+				spi_flash_erase_sector(FLASH_COM_CFG_BASE);
+				memset(IoTpAd.flash_rw_buf ,0xff, sizeof(IoTpAd.flash_rw_buf));
+
+				default_boot_cfg();
+				default_uart_cfg();
+				default_ip_cfg();
+
+				IoTpAd.flash_rw_buf[FLASH_COM_CFG_INFO_STORED]			= COMMON_INFO_STORED;
+				IoTpAd.flash_rw_buf[FLASH_COM_CFG_BOOT_IDX]				= DEFAULT_BOOT_FW_IDX;
+				IoTpAd.flash_rw_buf[FLASH_COM_CFG_RECOVERY_MODE_STATUS]	= DEFAULT_RECOVERY_MODE_STATUS;
+				IoTpAd.flash_rw_buf[FLASH_COM_CFG_IO_SET]				= DEFAULT_IO_MODE;
+				spi_flash_write(FLASH_COM_CFG_BASE, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
+			}
+		}
+	}
+	else
+	{
+		spi_flash_erase_sector(FLASH_COM_CFG_BASE);
+		memset(IoTpAd.flash_rw_buf ,0xff, sizeof(IoTpAd.flash_rw_buf));
+
+		default_boot_cfg();
+		default_uart_cfg();
+		default_ip_cfg();
+
+		IoTpAd.flash_rw_buf[FLASH_COM_CFG_INFO_STORED]			= COMMON_INFO_STORED;
+		IoTpAd.flash_rw_buf[FLASH_COM_CFG_BOOT_IDX]				= DEFAULT_BOOT_FW_IDX;
+		IoTpAd.flash_rw_buf[FLASH_COM_CFG_RECOVERY_MODE_STATUS]	= DEFAULT_RECOVERY_MODE_STATUS;
+		IoTpAd.flash_rw_buf[FLASH_COM_CFG_IO_SET]				= DEFAULT_IO_MODE;
+		spi_flash_write(FLASH_COM_CFG_BASE, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
+	}
+#endif
 }
 
 
@@ -649,6 +719,16 @@ bool load_com_cfg(void)
     default_boot_cfg();
     default_uart_cfg();
     default_ip_cfg();
+
+    /* read settings stored on flash Common CONFIG BLOCK */
+    spi_flash_read(FLASH_COM_CFG_BASE, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
+
+    /*use stored flag to shrink code size*/
+    if (IoTpAd.flash_rw_buf[FLASH_COM_CFG_INFO_STORED] == COMMON_INFO_STORED) {
+        IoTpAd.ComCfg.BootFWIdx            =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_BOOT_IDX];
+        IoTpAd.ComCfg.RecovModeStatus     =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_RECOVERY_MODE_STATUS];
+        IoTpAd.ComCfg.IOMode            =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_IO_SET];
+    }
 #endif
 
     return TRUE;
