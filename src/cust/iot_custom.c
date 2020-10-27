@@ -210,7 +210,7 @@ void iot_cust_init(void)
 
 	/*GPIO get status*/
     for (i=0; i<=3; i++) {
-		for (loop=0; loop<=10000; loop++);
+		for (loop=0; loop<=1000; loop++);
 		iot_gpio_input((int32)3, &gpio_input[i]);
     }
 
