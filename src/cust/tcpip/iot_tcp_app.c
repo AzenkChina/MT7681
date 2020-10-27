@@ -7,7 +7,6 @@
 #include "uip_timer.h"
 
 extern IOT_ADAPTER       IoTpAd;
-extern int cli_fd;
 extern u8_t gCurrentAddress[];
 extern u16_t http_clientPort;
 #if UIP_CLOUD_SERVER_SUPPORT
@@ -125,10 +124,6 @@ handle_tcp_app(void)
     u16_t lport = HTONS(uip_conn->lport);
 
     if (uip_aborted() || uip_timedout() || uip_closed()) {
-        switch (lport) {
-            case 7682: //IoT as clent.
-                cli_fd = -1;
-        }
         printf("fd %d uip_aborted.%d\n", uip_conn->fd, HTONS(uip_conn->lport));
 #if ENABLE_DATAPARSING_SEQUENCE_MGMT
         IoT_cp_app_connection_closed(uip_conn->fd);
@@ -161,12 +156,6 @@ handle_tcp_app(void)
 #endif
 
         s->state = IOT_APP_S_CONNECTED;
-        switch (lport) {
-            case 7682:
-                memcpy(logon_msg+10, gCurrentAddress, 6);
-                uip_send(logon_msg, 16);
-                break;
-        }
     }
 
     if (uip_acked()) {
@@ -178,7 +167,7 @@ handle_tcp_app(void)
 
     if (uip_newdata()) {
         printf("RX fd : %d\n", uip_conn->fd);
-        if (lport == IoTpAd.ComCfg.Local_TCP_Srv_Port || lport==7682) {
+        if (lport == IoTpAd.ComCfg.Local_TCP_Srv_Port) {
 #if ENABLE_DATAPARSING_SEQUENCE_MGMT
             iot_app_proc_pkt(uip_conn->fd, uip_appdata,uip_datalen());
 #else
