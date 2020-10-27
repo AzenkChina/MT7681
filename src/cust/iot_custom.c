@@ -294,14 +294,12 @@ void iot_cust_init(void)
 /* Sample code for custom SubTask and Timer */
 void cust_subtask(void)
 {
-#ifndef CONFIG_STATION
     /* The Task to Handle the AT Command */
 #if (ATCMD_SUPPORT == 1)
 #if (UART_INTERRUPT == 1)
     uart_rx_dispatch();
 #else
     iot_atcmd_hdlr();
-#endif
 #endif
 #endif
 
