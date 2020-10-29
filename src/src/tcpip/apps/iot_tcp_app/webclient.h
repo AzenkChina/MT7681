@@ -51,7 +51,7 @@
 #include "webclient-strings.h"
 #include "uipopt.h"
 
-#if (UIP_HTTP_CLIENT_SUPPORT || UIP_CLOUD_SERVER_SUPPORT)
+#if (UIP_HTTP_CLIENT_SUPPORT)
 
 #define WEBCLIENT_CONF_MAX_URLLEN 160
 #define HTTP_SERVER_DEFAULT_PORT  80
@@ -228,7 +228,7 @@ unsigned short webclient_port(void);
 void newdata(void)XIP_ATTRIBUTE(".xipsec0");
 void senddata(void) XIP_ATTRIBUTE(".xipsec0");
 
-#endif /*UIP_HTTP_CLIENT_SUPPORT || UIP_CLOUD_SERVER_SUPPORT*/
+#endif /*UIP_HTTP_CLIENT_SUPPORT*/
 
 #endif /* __WEBCLIENT_H__ */
 /** @} */

@@ -34,28 +34,4 @@ void iot_tcp_appcall(void);
 void iot_tcp_app_init(void)  XIP_ATTRIBUTE(".xipsec0");
 void handle_tcp_app(void);
 
-#if UIP_CLOUD_SERVER_SUPPORT
-#define CLOUD_TCP_SERVER_PORT 7680
-typedef struct t_ClientActivationInfo
-{
-    u8_t ServerURL[48];
-    u8_t DeviceID[16];
-    u8_t DeviceKey[24];
-    u8_t ProductID[16];
-    u8_t ProductKey[16];
-    u8_t UserID[12];
-    u16_t ForceFlag;
-    u16_t ActivedFlag;
-}ClientActivationInfo;
-
-typedef struct t_ClientConnectInfo
-{
-    u8_t ServerIP[18];
-    u16_t ServerPort;
-    u16_t FirstSendKeepAlive;
-    u16_t SendSeqID;
-    u16_t ReceiveSeqID;
-}ClientConnectInfo;
-#endif
-
 #endif

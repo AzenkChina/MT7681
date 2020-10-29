@@ -1,9 +1,5 @@
 #include "uip.h"
 #include "uip_timer.h"
-#if UIP_CLOUD_SERVER_SUPPORT
-extern ClientActivationInfo mt76xx_Activation;
-extern uint8 productID[16];
-#endif
 
 #if UDP_SRV_APP1_ENABLE
 void udp_srv_app1_init()
@@ -40,21 +36,12 @@ void handle_udp_srv_app1()
         /* uip_appdata is a pointer pointed the received data. */
         if (!memcmp(uip_appdata, "ip", 2)) {
             uip_gethostaddr(&ip);
-#if UIP_CLOUD_SERVER_SUPPORT
-            strTotLen = ipStrMaxLen + 2 + strlen(productID);
-            if(sizeof(addr) >= strTotLen){
-              sprintf((char *)addr, "%d.%d.%d.%d.%d.%s", 
-              uip_ipaddr1(ip), uip_ipaddr2(ip), 
-              uip_ipaddr3(ip), uip_ipaddr4(ip), mt76xx_Activation.ActivedFlag, productID);
-            }
-#else
             strTotLen = ipStrMaxLen;
             if(sizeof(addr) >= strTotLen){
               sprintf((char *)addr, "%d.%d.%d.%d", 
               uip_ipaddr1(ip), uip_ipaddr2(ip), 
               uip_ipaddr3(ip), uip_ipaddr4(ip));
             }
-#endif
             uip_send(addr, sizeof(addr));
         }
     }

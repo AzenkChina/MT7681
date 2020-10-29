@@ -63,7 +63,7 @@
 
 #include <string.h>
 
-#if (UIP_HTTP_CLIENT_SUPPORT || UIP_CLOUD_SERVER_SUPPORT)
+#if (UIP_HTTP_CLIENT_SUPPORT)
 #define WEBCLIENT_TIMEOUT 100
 
 #define WEBCLIENT_STATE_STATUSLINE 0
@@ -83,11 +83,6 @@
 
 static struct webclient_state s;
 u16_t http_clientPort;
-#if UIP_CLOUD_SERVER_SUPPORT
-u16_t http_cloudClientPort;
-extern ClientActivationInfo mt76xx_Activation;
-extern u16_t mt76xx_cloudClientState;
-#endif
 /*-----------------------------------------------------------------------------------*/
 char *
 webclient_mimetype(void)
@@ -398,12 +393,6 @@ void webclient_datahandler(char *data, u16_t len)
             printf_high("%x ", *(data+i));
         printf_high("\n");
     }
-#endif
-#if UIP_CLOUD_SERVER_SUPPORT
-  if(len && mt76xx_cloudClientState)
-  {
-    cloud_http_callback(data, len);
-  }
 #endif
 
 }

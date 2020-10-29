@@ -196,10 +196,6 @@ void tcpip_periodic_timer()
             timer_reset(&arp_timer);
             uip_arp_timer();
         }
-		
-#if UIP_CLOUD_SERVER_SUPPORT
-		cloud_tcp_conn_check();
-#endif
     }
 }
 /*---------------------------------------------------------------------------*/

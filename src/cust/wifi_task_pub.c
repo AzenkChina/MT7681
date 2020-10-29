@@ -41,12 +41,6 @@ extern IOT_ADAPTER   IoTpAd;
 extern IOT_CUST_OP   IoTCustOp;
 extern MLME_STRUCT  *pIoTMlme;
 
-#if (ATCMD_RECOVERY_SUPPORT==1)
-#if UIP_CLOUD_SERVER_SUPPORT
-uint8 fota_update_ok[FLASH_COM_CFG_CLOUD_FOTA_UPDATEFLAG_LEN] = {0x22,0x33,0x44,0x55};
-#endif
-#endif
-
 /*****************************************************************
   Global Paramter
 ******************************************************************/
@@ -109,75 +103,6 @@ void wifi_rx_proc(void)
     return;
 }
 
-#if (ATCMD_RECOVERY_SUPPORT==1)
-#if UIP_CLOUD_SERVER_SUPPORT
-uint32 recovery_fota_update(void)
-{
-    uint8 message[FLASH_COM_CFG_CLOUD_FOTA_IMGSIZE_LEN+FLASH_COM_CFG_CLOUD_FOTA_UPDATEFLAG_LEN] = {0};
-    uint32 ret = 0, len = 0, updateErr = 0;
-    uint8 fileBuf[128] = {0};
-    uint32 rRegionOffset = 0, rSize= 0, rTotalSize = 0, rLen = 0;
-    uint32 wPageNum = 0;
-
-    len = FLASH_COM_CFG_CLOUD_FOTA_IMGSIZE_LEN+FLASH_COM_CFG_CLOUD_FOTA_UPDATEFLAG_LEN;
-    spi_flash_read(FLASH_COM_CFG_BASE+FLASH_COM_CFG_CLOUD_FOTA_IMGSIZE, message, len);
-    ret = memcmp(message+FLASH_COM_CFG_CLOUD_FOTA_IMGSIZE_LEN, fota_update_ok, FLASH_COM_CFG_CLOUD_FOTA_UPDATEFLAG_LEN);
-    memcpy((uint8 *)(&rTotalSize), message, FLASH_COM_CFG_CLOUD_FOTA_IMGSIZE_LEN);
-
-    if(!ret){
-        spi_flash_read(FLASH_COM_CFG_BASE+FLASH_COM_CFG_BOOT_IDX, message, FLASH_COM_CFG_BOOT_IDX_LEN);
-        if((message[0] == 0)||(message[0] == 1)) {
-            rRegionOffset = FLASH_OFFSET_OTA_START;
-            rSize = 0;
-            printf_high("FOTA update start,rTotalSize:%d\n", rTotalSize);
-
-            while(rTotalSize){
-                if(rTotalSize > sizeof(fileBuf)){
-                        spi_flash_read(rRegionOffset+rSize, fileBuf, sizeof(fileBuf));
-                        rSize += sizeof(fileBuf);
-                        rLen = sizeof(fileBuf);
-                        rTotalSize -= sizeof(fileBuf);
-                    }else{
-                        spi_flash_read(rRegionOffset+rSize, fileBuf, sizeof(fileBuf));
-                        rSize += rTotalSize;
-                        rLen = sizeof(fileBuf);
-                        rTotalSize = 0;
-                    }
-                wPageNum ++;
-
-                if(message[0] == 0){
-                    ret = spi_flash_update_fw(UART_FlASH_UPG_ID_STA_FW, (wPageNum-1)*128, fileBuf, rLen);
-                    if(ret){
-                        updateErr ++;
-                        printf_high("%s, spi_flash_update_fw station error!\n", __func__);
-                    }
-                }else if(message[0] == 1){
-                    ret = spi_flash_update_fw(UART_FlASH_UPG_ID_AP_FW, (wPageNum-1)*128, fileBuf, rLen);
-                    if(ret){
-                        updateErr ++;
-                        printf_high("%s, spi_flash_update_fw AP error!\n", __func__);
-                    }
-                }
-            }
-
-            if(!updateErr){
-                memset(message, 0, len);
-                spi_flash_write(FLASH_COM_CFG_BASE+FLASH_COM_CFG_CLOUD_FOTA_IMGSIZE, message, len);//clear flag
-                printf_high("FOTA update successfully!\n");
-                return 0;
-            }else{
-                printf_high("FOTA update error,updateErr:%d!\n", updateErr);
-                return 1;
-            }
-        }else{
-            printf_high("FOTA update flag setup,but boot mode error.\n");
-            return 2;
-        }
-    }
-}
-#endif
-#endif
-
 
 /******************************************************************************
  * wifiTASK_LowPrioTask
@@ -202,12 +127,6 @@ wifiTASK_LowPrioTask (void)
 
     /*Periodic Auto Calibration*/
     cali_period_exec();
-
-#if (ATCMD_RECOVERY_SUPPORT==1)
-#if UIP_CLOUD_SERVER_SUPPORT
-    recovery_fota_update();
-#endif
-#endif
 
     /*Exit Recovery or Calibration Mode Process*/
 #if (ATCMD_RECOVERY_SUPPORT == 1)

@@ -15,10 +15,6 @@
 extern IOT_ADAPTER       IoTpAd;
 extern u8_t gCurrentAddress[];
 extern u16_t http_clientPort;
-#if UIP_CLOUD_SERVER_SUPPORT
-extern u16_t TCP_cloudClientPort;
-ClientActivationInfo mt76xx_Activation;
-#endif
 #if (ATCMD_SUPPORT == 0)
 #if (UART_INTERRUPT == 1)
 extern UARTStruct UARTPort;
@@ -55,11 +51,6 @@ iot_tcp_app_init(void)
     uip_listen(HTONS(TCP_SRV_APP1_LOCAL_PORT));
 #endif
 
-#if UIP_CLOUD_SERVER_SUPPORT
-    uip_listen(HTONS(CLOUD_TCP_SERVER_PORT));
-    cloud_para_check_connect();
-#endif
-
 }
 
 /*---------------------------------------------------------------------------*/
@@ -92,29 +83,6 @@ iot_tcp_appcall(void)
 #if TCP_SRV_APP1_ENABLE
     if (lport == TCP_SRV_APP1_LOCAL_PORT) {
         handle_tcp_srv_app1();
-        return;
-    }
-#endif
-
-#if UIP_CLOUD_SERVER_SUPPORT
-    if (uip_newdata()) {
-        if(lport == CLOUD_TCP_SERVER_PORT){
-            if(uip_datalen()%2 == 0){
-                cloud_activation_process(uip_appdata, uip_datalen());
-            }else{
-                printf_high("data length:%d from apk error\n", uip_datalen());
-            }
-            return;
-        }
-    }
-
-    if(lport == http_clientPort) {
-        webclient_appcall();
-        return;
-    }
-
-    if(lport == TCP_cloudClientPort) {
-        cloudClient_tcpAppcall();
         return;
     }
 #endif
