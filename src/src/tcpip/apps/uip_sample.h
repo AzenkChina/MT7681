@@ -26,52 +26,6 @@
 #ifndef __UIPSAMPLE_H__
 #define __UIPSAMPLE_H__
 
-/***  Example for UDP SERVER APP 1 ****/
-/*This APP make MT7681 as a UDP server,  it will receive UDP packet from local port7682,
-   if received message "ip",  this UDP server will send its own ip address to the UDP clients who send "ip" message,
-   For MTK IoTManager.APK demo , this macro need to be enabled*/
-#define UDP_SRV_APP1_ENABLE       0
-
-
-#ifdef CONFIG_SOFTAP
-/***  Example for UDP SERVER APP 2 ****/
-/*This APP make MT7681 as a UDP server, it will receive UDP packet from local port5555 ,
-    and determined the remote port, then send UDP test packet to remote port for all connected stations
-    This APP only demo in MT7681 AP mode */
-#define UDP_SRV_APP2_ENABLE       0
-#endif
-
-
-/**************************************************/
-/******************UDP SERVER*********************/
-/**************************************************/
-#if UDP_SRV_APP1_ENABLE
-#define UDP_SRV_APP1_LOCAL_PORT     7682
-#define UDP_SRV_APP1_REMOTE_PORT    0
-
-extern void udp_srv_app1_init(void)  XIP_ATTRIBUTE(".xipsec0");
-extern void handle_udp_srv_app1(void);
-#endif
-
-
-#if UDP_SRV_APP2_ENABLE
-#define UDP_SRV_APP2_LOCAL_PORT     5555
-#define UDP_SRV_APP2_REMOTE_PORT    0
-
-extern void udp_srv_app2_init(void)  XIP_ATTRIBUTE(".xipsec0");
-extern void handle_udp_srv_app2(void);
-#endif
-
-
-
-
-
-
-
-
-
-
-
 /***  Example for TCP SERVER APP 1 ****/
 /*This APP make MT7681 as a TCP server,  it will send TCP packet contrains "hello..."
     message from local port9998 to TCP Client every 5sec,

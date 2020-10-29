@@ -37,14 +37,6 @@ iot_udp_app_init(void)
 #endif
 
     /********* Customer APP start. **********/
-    /* udp_client_init(); */
-
-#if UDP_SRV_APP1_ENABLE
-    udp_srv_app1_init();
-#endif
-#if UDP_SRV_APP2_ENABLE
-    udp_srv_app2_init();
-#endif
 
     /********* Customer APP end. **********/
 
@@ -69,21 +61,6 @@ iot_udp_appcall(void)
     }
 #endif
     /* Customer APP start. */
-#if UDP_SRV_APP1_ENABLE
-    else if (lport == UDP_SRV_APP1_LOCAL_PORT) {
-        handle_udp_srv_app1();
-    }
-#endif
-#if UDP_SRV_APP2_ENABLE
-    else if (lport == UDP_SRV_APP2_LOCAL_PORT) {
-        handle_udp_srv_app2();
-    }
-#endif
-    /* else if (lport == 6666) {
-        udp_client_sample();
-    } else if (lport == 8888) {
-        resolv_usage_sample();
-    }*/
 #ifdef CONFIG_SOFTAP
     else if (lport == DHCPC_SERVER_PORT) {
         handle_dhcpd();
