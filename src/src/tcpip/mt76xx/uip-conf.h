@@ -99,11 +99,8 @@ typedef unsigned short uip_stats_t;
  *
  * \hideinitializer
  */
-#if CFG_SUPPORT_TCPIP_ROBUST_TEST
-#define UIP_CONF_MAX_LISTENPORTS 2
-#else
 #define UIP_CONF_MAX_LISTENPORTS 6 //Jody for more connections
-#endif
+
 /**
  * Maximum number of UDP connections..
  *

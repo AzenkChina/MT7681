@@ -30,9 +30,6 @@ iot_tcp_app_init(void)
 {
     /* We start to listen for connections on TCP port 7681. */
     uip_listen(HTONS(IoTpAd.ComCfg.Local_TCP_Srv_Port));
-#if CFG_SUPPORT_TCPIP_ROBUST_TEST
-    uip_listen(HTONS(7684));
-#endif
 
 #if TCP_CLI_APP1_ENABLE
     tcp_cli_app1_init();
@@ -96,9 +93,6 @@ handle_tcp_app(void)
 
     if (uip_aborted() || uip_timedout() || uip_closed()) {
         printf("fd %d uip_aborted.%d\n", uip_conn->fd, HTONS(uip_conn->lport));
-#if ENABLE_DATAPARSING_SEQUENCE_MGMT
-        IoT_cp_app_connection_closed(uip_conn->fd);
-#endif
         s->state = IOT_APP_S_CLOSED;
         s->buf = NULL;
         s->len = 0;
@@ -118,16 +112,6 @@ handle_tcp_app(void)
                     uip_conn->fd, HTONS(uip_conn->lport), raddr, HTONS(uip_conn->rport));
 #endif
 
-#if ENABLE_DATAPARSING_SEQUENCE_MGMT
-        IoT_cp_app_connection_connected(uip_conn->fd
-#if (NO_USED_CODE_REMOVE==0)
-                                        ,HTONS(uip_conn->lport),
-                                        raddr,
-                                        HTONS(uip_conn->rport)
-#endif
-                                       );
-#endif
-
         s->state = IOT_APP_S_CONNECTED;
     }
 
@@ -143,10 +127,6 @@ handle_tcp_app(void)
         if (lport == IoTpAd.ComCfg.Local_TCP_Srv_Port) {
 #if (UART_SUPPORT ==1)
             iot_uart_output(uip_appdata, (int16)uip_datalen());
-#endif
-#if CFG_SUPPORT_TCPIP_ROBUST_TEST
-        } else if (lport==7684) {
-            uip_send(uip_appdata, uip_datalen());
 #endif
         } else {
 #if ATCMD_TCPIP_SUPPORT

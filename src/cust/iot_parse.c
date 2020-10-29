@@ -231,11 +231,7 @@ int32 iot_app_proc_func_pkt(
 
     if ((Need_resp == TRUE) && (payload_len <= sizeof(iot_buffer))) {
 #if CFG_SUPPORT_TCPIP
-#if (AES_DATAPARSING_SUPPORT == 1)
-        AES_uip_send(iot_buffer, payload_len);
-#else
         uip_send(iot_buffer, payload_len);
-#endif /*(AES_DATAPARSING_SUPPORT == 1)*/
 #else
         iot_udp_pkt_send(src_addr, dest_addr, TCPUDP_SRC_PORT, TCPUDP_DST_PORT, iot_buffer, payload_len);
 #endif /*CFG_SUPPORT_TCPIP*/
@@ -299,11 +295,7 @@ int32 iot_app_proc_mgmt_pkt(
             Status_out->StatusCode = 0;
             payload_len = (uint16)(CP_HDR_LEN+CP_DATA_HDR_LEN+sizeof(Status));
 #if CFG_SUPPORT_TCPIP
-#if (AES_DATAPARSING_SUPPORT == 1)
-            AES_uip_send(iot_buffer, payload_len);
-#else
             uip_send(iot_buffer, payload_len);
-#endif  /*(AES_DATAPARSING_SUPPORT == 1)*/
 #else
             iot_udp_pkt_send(src_addr, dest_addr, TCPUDP_SRC_PORT, TCPUDP_DST_PORT, iot_buffer, payload_len);
 #endif /*CFG_SUPPORT_TCPIP*/
@@ -342,11 +334,7 @@ int32 iot_app_proc_mgmt_pkt(
     }
     if (Need_resp == TRUE) {
 #if CFG_SUPPORT_TCPIP
-#if (AES_DATAPARSING_SUPPORT == 1)
-        AES_uip_send(iot_buffer, payload_len);
-#else
         uip_send(iot_buffer, payload_len);
-#endif /*(AES_DATAPARSING_SUPPORT == 1)*/
 #else /*CFG_SUPPORT_TCPIP*/
         iot_udp_pkt_send(src_addr, dest_addr, TCPUDP_SRC_PORT, TCPUDP_DST_PORT, iot_buffer, payload_len);
 #endif
@@ -357,9 +345,6 @@ int32 iot_app_proc_mgmt_pkt(
 
 
 int32 iot_app_proc_pkt(
-#if ENABLE_DATAPARSING_SEQUENCE_MGMT
-    uint8 sock_num,
-#endif
     puchar packet ,
     uint16 rawpacketlength
 )
@@ -368,16 +353,6 @@ int32 iot_app_proc_pkt(
     IoTPacketInfo  PacketInfo;
     IoTCtrlProtocolHeader * ProtocolHeader;
     uint8 Subtype;
-
-#if (AES_DATAPARSING_SUPPORT == 1)
-    uint8 Plain[IOT_BUFFER_LEN];
-    uint16 PlainLen = 0;
-
-    AES_receive(packet, &rawpacketlength, Plain, &PlainLen);
-
-    packet = Plain;
-    rawpacketlength = PlainLen;
-#endif
 
     ProtocolHeader = (IoTCtrlProtocolHeader *)packet;
     Dataheader = (DataHeader *)(packet+CP_HDR_LEN);
@@ -410,15 +385,6 @@ int32 iot_app_proc_pkt(
     //printf_high("sendmac: %02x:%02x:%02x:%02x:%02x:%02x \n",PRINT_MAC(PacketInfo.SendMAC));
     //printf_high("receiveMAC: %02x:%02x:%02x:%02x:%02x:%02x \n",PRINT_MAC(PacketInfo.ReceiveMAC));
 
-    /*no need handler the packet with the same seqence number as before*/
-#if ENABLE_DATAPARSING_SEQUENCE_MGMT
-    preSeq = IoT_cp_app_search_seq(sock_num);
-    if (!(PacketInfo.Sequence == 0 ||PacketInfo.Sequence > preSeq)) {
-        //printf_high("wrong packet sequence: %x,%x\n", PacketInfo.Sequence, preSeq);
-        return 0;
-    }
-#endif
-
     Subtype = ProtocolHeader->SubHdr.field.SubType;
 
     if (ProtocolHeader->SubHdr.field.Type == FUNCTION) {
@@ -427,11 +393,7 @@ int32 iot_app_proc_pkt(
         iot_app_proc_mgmt_pkt(Dataheader, Subtype, &PacketInfo);
     }
 
-#if ENABLE_DATAPARSING_SEQUENCE_MGMT
-    IoT_cp_app_set_seq(sock_num, PacketInfo.Sequence);
-#else
     preSeq = PacketInfo.Sequence;
-#endif
 
     return 0;
 }

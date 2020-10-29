@@ -965,11 +965,7 @@ int32 iot_sw_pwm_del(uint8 gpio_num)  XIP_ATTRIBUTE(".xipsec0");
 /******************************************************************************
  * FUNCTIONS DEFINITION  -- DataParser
  ******************************************************************************/
-#if ENABLE_DATAPARSING_SEQUENCE_MGMT
-int32  iot_app_proc_pkt(uint8 sock_num, puchar packet , uint16 rawpacketlength);
-#else
 int32  iot_app_proc_pkt(puchar packet , uint16 rawpacketlength);
-#endif
 void   iot_udp_pkt_send(puchar pSrcAddr, puchar pDstAddr, uint16 SrcPort, uint16 DstPort, puchar pPayload, uint16  PayloadLen) XIP_ATTRIBUTE(".xipsec0");
 int32  IoT_build_app_response_header(puchar buffer, uint8 ProtoType, uint8 ProtoSubType, uint16 DataType, uint16 DataLen, struct t_IoTPacketInfo *PacketInfo) XIP_ATTRIBUTE(".xipsec0");
 int32  iot_app_proc_func_pkt(DataHeader* Dataheader, uint8 FunctionType, IoTPacketInfo  *pPacketInfo) XIP_ATTRIBUTE(".xipsec0");
