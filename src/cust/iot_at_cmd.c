@@ -1137,20 +1137,6 @@ int16 iot_atcmd_detect(uint8* pType)
         if (read == -1)
             return -1;
 
-#if (UARTRX_TO_AIR_LEVEL == 1)
-        uart_rb_push(ch);
-
-#elif (UARTRX_TO_AIR_LEVEL == 2)
-        if (iot_uart_rx_mode == UARTRX_PUREDATA_MODE) {
-            if (cmd_len >= AT_CMD_MAX_LEN) {
-                cmd_len = 0;
-            }
-            command[cmd_len] = ch;
-            cmd_len++;
-            continue;
-        }
-#endif
-
         if (CmdType == PKT_UNKNOWN) {
             /*case 1:AT#*/
             if (ATCmdPrefixAT[ATMatchNum] == ch)

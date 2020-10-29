@@ -210,16 +210,6 @@ bool default_ip_cfg(void) XIP_ATTRIBUTE(".xipsec0");
 void iot_cust_hwtimer1_hdlr(void);
 uint32 iot_cust_hwtimer1_tick(void);
 
-#if (UARTRX_TO_AIR_LEVEL == 2)
-void iot_cust_u2w_init(uint32 interval, int32 triger_count);
-void iot_cust_u2w_mode_chg(UartRxMode mode);
-void iot_cust_u2w_time_act(uint32 param1, uint32 param2);
-void iot_cust_u2w_buf_act(void);
-void iot_cust_u2w_data_hdlr(uint8 *uart_content, int16 uart_content_count);
-void iot_cust_u2w_mode_chg_hdlr(void);
-int32 iot_cust_u2w_gpio_detect(void);
-#endif
-
 /******************************************************************************
  * FUNCTIONS DEFINITION  -- AT Command & ATE Calibration
  ******************************************************************************/

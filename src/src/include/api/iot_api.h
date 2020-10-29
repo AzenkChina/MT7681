@@ -212,21 +212,6 @@ typedef enum {
 } PKT_TYPE;
 
 
-/*
- * UART RX to Air parameters
- */
-#if (UARTRX_TO_AIR_LEVEL == 2)
-#define  UART2WIFI_TIMER_INTERVAL    300   //ms
-#define  UART2WIFI_LEN_THRESHOLD     10    //bytes
-
-#if (UART_INTERRUPT == 1)
-#define  UARTRX_TO_AIR_THRESHOLD   (UARTRX_RING_LEN/2)
-#else
-#define  UARTRX_TO_AIR_THRESHOLD   (AT_CMD_MAX_LEN/2)
-#endif
-#endif
-
-
 #if (UART_INTERRUPT == 1)
 //buffer length for uart rx buffer whose data is moved from uart UART HW RX FIFO
 #define    UARTRX_RING_LEN    512
@@ -736,10 +721,6 @@ typedef struct GNU_PACKED _STA_ADMIN_CONFIG {
 /******************************************************************************
  * Interface  MACRO & STRUCTURE
  ******************************************************************************/
-#if (UARTRX_TO_AIR_LEVEL == 1)
-#define UART_RX_RING_BUFF_SIZE  (IOT_BUFFER_LEN - CP_HDR_LEN - CP_DATA_HDR_LEN)
-#endif
-
 #define IOT_PWM_TYPE         2   // 1 for Hardware pwm,   2 for Software pwm
 
 #if (IOT_PWM_SUPPORT == 1 && IOT_PWM_TYPE == 1)

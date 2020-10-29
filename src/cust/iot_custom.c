@@ -297,11 +297,6 @@ void cust_subtask(void)
 #endif
 #endif
 
-    /* The Task to Handle the Uart to Wifi feature */
-#if (UARTRX_TO_AIR_LEVEL == 2)
-    iot_cust_u2w_buf_act();
-#endif
-
     /*  The Task to collect all rx packet and calculate the average signal strength*/
 #if (IOT_SMP_RSSI_COLLECT == 1)
     {
@@ -353,10 +348,6 @@ void cust_app_init(void)
 
     /*for customer timer initialization*/
     cnmTimerInitTimer(&IoTCustTimer.custTimer0,  iot_cust_timer0_timeout_actioin, 0, 0);
-
-#if (UARTRX_TO_AIR_LEVEL == 2)
-    iot_cust_u2w_init(UART2WIFI_TIMER_INTERVAL,  UART2WIFI_LEN_THRESHOLD);
-#endif
 
     cnmTimerStartTimer (&IoTCustTimer.custTimer0, 100);
 
@@ -511,10 +502,6 @@ void iot_cust_ops(void)
 void iot_cust_timer0_timeout_actioin(uint32 param, uint32 param2)
 {
     printf("iot_cust_timer0_timeout_actioin\n");
-
-#if (UARTRX_TO_AIR_LEVEL == 2)
-    iot_cust_u2w_mode_chg_hdlr();
-#endif
 
     cnmTimerStartTimer (&IoTCustTimer.custTimer0, 100);
 }

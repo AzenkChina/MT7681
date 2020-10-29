@@ -43,10 +43,6 @@ char ATCmdPrefixAT[] = AT_CMD_PREFIX;
 char ATCmdPrefixIW[] = AT_CMD_PREFIX2;
 extern bool UART_TX_POLL_ENABLE;
 
-#if (UARTRX_TO_AIR_LEVEL == 2)
-extern int iot_uart_rx_mode;
-#endif
-
 /**************************************************************************/
 /**************************************************************************/
 void uart_rxbuf_init(UARTStruct *qp)
@@ -153,18 +149,7 @@ void uart_tx_cb(void)
 extern uint16 _UART_GetByte(volatile uint8 *Byte);
 uint16 uart_get_byte(volatile uint8 *Byte)
 {
-#if (UARTRX_TO_AIR_LEVEL == 1)
-    //save bytes to query ring buff also
-    if (_UART_GetByte(Byte)) {
-        uart_rb_push(*Byte);
-        return 1;
-    } else  {
-        UART_EnableRX();
-        return 0;
-    }
-#else
     return _UART_GetByte(Byte);
-#endif
 }
 
 
@@ -187,19 +172,6 @@ void uart_rx_cb(void)
 
     static uint8  ATMatchNum = 0;
     static uint8  IWMatchNum = 0;
-
-    /*
-     * MCU only forward uart rx data to air
-     * here,copy to rx ring and return
-     */
-#if (UARTRX_TO_AIR_LEVEL == 2)
-    if (iot_uart_rx_mode == UARTRX_PUREDATA_MODE) {
-        while (uart_get_byte(&ch)) {
-            Buf_Push(rx_ring,ch);
-        }
-        return;
-    }
-#endif
 
     /*
      * MCU only forward uart rx data to client
@@ -365,57 +337,12 @@ void uart_rx_dispatch(void)
 
 void iot_uart_init(void)
 {
-#if (UARTRX_TO_AIR_LEVEL == 1)
-    uart_rb_init();
-#endif
-
 #if (UART_INTERRUPT == 1)
     /*configure ringbuffer*/
     Buf_init(&(UARTPort.Tx_Buffer),(uint8 *)(UARTTxBuf),(uint16)UARTTX_RING_LEN);
     uart_rxbuf_init((UARTStruct*)(&UARTPort));
 #endif
 }
-
-
-#if (UARTRX_TO_AIR_LEVEL == 1)
-/*query ring buff*/
-BUFFER_INFO uart_rb_info;
-uint8 uart_rb_addr[UART_RX_RING_BUFF_SIZE];
-
-void uart_rb_init(void)
-{
-    BUFFER_INFO *puart_rb_info = &uart_rb_info;
-    uint8 * puart_rb_addr = uart_rb_addr;
-
-    Buf_init(puart_rb_info, puart_rb_addr, UART_RX_RING_BUFF_SIZE);
-    return;
-}
-
-uint8 uart_rb_pop(void)
-{
-    BUFFER_INFO *puart_rb_info = &uart_rb_info;
-    uint8 ch;
-
-    Buf_Pop(puart_rb_info, ch);
-    return ch;
-}
-
-void uart_rb_push(uint8 ch)
-{
-    BUFFER_INFO *puart_rb_info = &uart_rb_info;
-    Buf_Push(puart_rb_info,ch);
-    return;
-}
-
-uint16 uart_get_avail(void)
-{
-    BUFFER_INFO *puart_rb_info = &uart_rb_info;
-    uint16 count;
-
-    Buf_GetBytesAvail(puart_rb_info, count);
-    return count;
-}
-#endif
 
 /*This function shall be called in BSP_init()*/
 void uart_cfg_fr_flash(void)

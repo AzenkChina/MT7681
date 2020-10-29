@@ -240,10 +240,6 @@ FUNCFLAGS	+=	-DATCMD_JTAGMODE_SUPPORT=0    #not support
 FUNCFLAGS	+=	-DIOT_PWM_SUPPORT=0
 FUNCFLAGS	+=	-DAES_DATAPARSING_SUPPORT=0
 FUNCFLAGS	+=	-DENABLE_DATAPARSING_SEQUENCE_MGMT=0
-#----UARTRX_TO_AIR_LEVEL
-#----1,handle uart rx data normaly,and send uart rx data which left in ring to air by peer query;
-#----2,do not handle uart rx data,only send uart rx data to air automatically
-FUNCFLAGS	+=	-DUARTRX_TO_AIR_LEVEL=0
 
 # FEATURE FLAGS
 FUNCFLAGS	+=	-DXIP_ENABLE=0              #xip_ovly.h  Need disabled in recovery mode

@@ -75,9 +75,6 @@ int32 iot_app_proc_func_pkt(
     UART_Information *UartData_out;
     uint32 gpio_input=0;
     //uint8 gpio_read=0,  Polarity=0;
-#if (UARTRX_TO_AIR_LEVEL == 1)
-    uint16 uart_content_count=0;
-#endif
     uint8 iot_buffer[IOT_BUFFER_LEN]={0};
     puchar Data;
     uint8 * Data_out;
@@ -228,24 +225,7 @@ int32 iot_app_proc_func_pkt(
             break;
 
         case UART_GET_REQUEST:
-            //printf_high("UART_GET_REQUEST\n");
-#if (UARTRX_TO_AIR_LEVEL == 1)
-            if (pPacketInfo->Sequence == preSeq)
-                return 0;
-
-            uart_content_count = uart_get_avail();
-            if (uart_content_count > sizeof(UartData_out->Data))  /*for Building3 ID98*/
-                uart_content_count = sizeof(UartData_out->Data);
-            
-            for (i=0; i<uart_content_count; i++)
-                UartData_out->Data[(uint8)i] = uart_rb_pop();
-
-            //printf_high("UART_GET_REQUEST:%d,%x,%x\n",uart_content_count,Data_out[0],Data_out[1]);
-            IoT_build_app_response_header(iot_buffer, FUNCTION, UART_GET_RESPONSE, UART_INFORMATION, uart_content_count, pPacketInfo);
-            payload_len = (uint16)(CP_HDR_LEN+CP_DATA_HDR_LEN+uart_content_count);
-#else
             return 0;
-#endif
             break;
     }
 
