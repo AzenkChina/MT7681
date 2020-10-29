@@ -218,10 +218,7 @@ void handle_tcp_cli_app1(void)
 #if TCP_SRV_APP1_ENABLE
 void handle_tcp_srv_app1(void)
 {
-    static bool app_init = FALSE;
-    char result[32];
-
-    memset(result, 0, sizeof(result));
+    static char result[32] = {0};
 
     if (uip_newdata()) {
 		if((uip_datalen() >= strlen("AT#300")) && memcmp(uip_appdata, "AT#300", strlen("AT#300")) == 0) {
@@ -294,12 +291,10 @@ void handle_tcp_srv_app1(void)
 
     if (uip_poll()) {
         /* below codes shows how to send data to client  */
-        if (app_init == FALSE) {
-            if(strlen(result)) {
-                uip_send(result, strlen(result)+1);
-                app_init = TRUE;
-            }
-        }
+		if(strlen(result)) {
+			uip_send(result, strlen(result)+1);
+			memset(result, 0, sizeof(result));
+		}
     }
 }
 #endif
