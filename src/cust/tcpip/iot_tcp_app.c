@@ -3,7 +3,6 @@
 #include "uiplib.h"
 #include "iot_api.h"
 #include "string.h"
-#include "webclient.h"
 #include "uip_timer.h"
 #if (ATCMD_SUPPORT == 0)
 #if (UART_INTERRUPT == 1)

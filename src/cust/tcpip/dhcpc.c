@@ -35,7 +35,6 @@
 #include "uip.h"
 #include "dhcpc.h"
 #include "iot_api.h"
-#include "webclient.h"
 
 /*---------------------------------------------------------------------------*/
 /*to indicated wheter store the SMNT setting after Wifi Connected AP and Got IP*/

@@ -181,7 +181,6 @@ typedef unsigned short uip_stats_t;
 /*#include "webserver.h"*/
 /*#include "dhcpc.h"*/
 /*#include "resolv.h"*/
-/*#include "webclient.h"*/
 #include "iot_tcp_app.h"
 #include "iot_udp_app.h"
 
