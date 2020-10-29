@@ -218,7 +218,6 @@ void handle_tcp_cli_app1(void)
 #if TCP_SRV_APP1_ENABLE
 void handle_tcp_srv_app1(void)
 {
-    static struct timer user_timer; //create a timer;
     static bool app_init = FALSE;
     char result[32];
 
@@ -295,10 +294,9 @@ void handle_tcp_srv_app1(void)
 
     if (uip_poll()) {
         /* below codes shows how to send data to client  */
-        if ((app_init == FALSE) || timer_expired(&user_timer)) {
+        if (app_init == FALSE) {
             if(strlen(result)) {
                 uip_send(result, strlen(result)+1);
-                timer_set(&user_timer, 5*CLOCK_SECOND);
                 app_init = TRUE;
             }
         }
