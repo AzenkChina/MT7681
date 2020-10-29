@@ -4,6 +4,7 @@
 #include "iot_api.h"
 #include "string.h"
 #include "uip_timer.h"
+#include "iot_custom.h"
 #if (ATCMD_SUPPORT == 0)
 #if (UART_INTERRUPT == 1)
 #include "bmd.h"
@@ -218,83 +219,23 @@ void handle_tcp_cli_app1(void)
 #if TCP_SRV_APP1_ENABLE
 void handle_tcp_srv_app1(void)
 {
-    static char result[32] = {0};
+    static char result = 0xff;
 
     if (uip_newdata()) {
-		if((uip_datalen() >= strlen("AT#300")) && memcmp(uip_appdata, "AT#300", strlen("AT#300")) == 0) {
-			strcpy(result, "Baudrate 300");
-		}
-		else if((uip_datalen() >= strlen("AT#600")) && memcmp(uip_appdata, "AT#600", strlen("AT#600")) == 0) {
-			strcpy(result, "Baudrate 600");
-		}
-		else if((uip_datalen() >= strlen("AT#1200")) && memcmp(uip_appdata, "AT#1200", strlen("AT#1200")) == 0) {
-			strcpy(result, "Baudrate 1200");
-		}
-		else if((uip_datalen() >= strlen("AT#2400")) && memcmp(uip_appdata, "AT#2400", strlen("AT#2400")) == 0) {
-			strcpy(result, "Baudrate 2400");
-		}
-		else if((uip_datalen() >= strlen("AT#4800")) && memcmp(uip_appdata, "AT#4800", strlen("AT#4800")) == 0) {
-			strcpy(result, "Baudrate 4800");
-		}
-		else if((uip_datalen() >= strlen("AT#7200")) && memcmp(uip_appdata, "AT#7200", strlen("AT#7200")) == 0) {
-			strcpy(result, "Baudrate 7200");
-		}
-		else if((uip_datalen() >= strlen("AT#9600")) && memcmp(uip_appdata, "AT#9600", strlen("AT#9600")) == 0) {
-			strcpy(result, "Baudrate 9600");
-		}
-		else if((uip_datalen() >= strlen("AT#14400")) && memcmp(uip_appdata, "AT#14400", strlen("AT#14400")) == 0) {
-			strcpy(result, "Baudrate 14400");
-		}
-		else if((uip_datalen() >= strlen("AT#19200")) && memcmp(uip_appdata, "AT#19200", strlen("AT#19200")) == 0) {
-			strcpy(result, "Baudrate 19200");
-		}
-		else if((uip_datalen() >= strlen("AT#28800")) && memcmp(uip_appdata, "AT#28800", strlen("AT#28800")) == 0) {
-			strcpy(result, "Baudrate 28800");
-		}
-		else if((uip_datalen() >= strlen("AT#33900")) && memcmp(uip_appdata, "AT#33900", strlen("AT#33900")) == 0) {
-			strcpy(result, "Baudrate 33900");
-		}
-		else if((uip_datalen() >= strlen("AT#38400")) && memcmp(uip_appdata, "AT#38400", strlen("AT#38400")) == 0) {
-			strcpy(result, "Baudrate 38400");
-		}
-		else if((uip_datalen() >= strlen("AT#57600")) && memcmp(uip_appdata, "AT#57600", strlen("AT#57600")) == 0) {
-			strcpy(result, "Baudrate 57600");
-		}
-		else if((uip_datalen() >= strlen("AT#115200")) && memcmp(uip_appdata, "AT#115200", strlen("AT#115200")) == 0) {
-			strcpy(result, "Baudrate 115200");
-		}
-		else if((uip_datalen() >= strlen("AT#7")) && memcmp(uip_appdata, "AT#7", strlen("AT#7")) == 0) {
-			strcpy(result, "Data bit 7");
-		}
-		else if((uip_datalen() >= strlen("AT#8")) && memcmp(uip_appdata, "AT#8", strlen("AT#8")) == 0) {
-			strcpy(result, "Data bit 8");
-		}
-		else if((uip_datalen() >= strlen("AT#none")) && memcmp(uip_appdata, "AT#none", strlen("AT#none")) == 0) {
-			strcpy(result, "Parity none");
-		}
-		else if((uip_datalen() >= strlen("AT#even")) && memcmp(uip_appdata, "AT#even", strlen("AT#even")) == 0) {
-			strcpy(result, "Parity even");
-		}
-		else if((uip_datalen() >= strlen("AT#odd")) && memcmp(uip_appdata, "AT#odd", strlen("AT#odd")) == 0) {
-			strcpy(result, "Parity odd");
-		}
-		else if((uip_datalen() >= strlen("AT#1")) && memcmp(uip_appdata, "AT#1", strlen("AT#1")) == 0) {
-			strcpy(result, "Stop bit 1");
-		}
-		else if((uip_datalen() >= strlen("AT#1.5")) && memcmp(uip_appdata, "AT#1.5", strlen("AT#1.5")) == 0) {
-			strcpy(result, "Stop bit 1.5");
-		}
-		else if((uip_datalen() >= strlen("AT#2")) && memcmp(uip_appdata, "AT#2", strlen("AT#2")) == 0) {
-			strcpy(result, "Stop bit 2");
-		}
+#if (ATCMD_UART_SUPPORT == 1) && (UART_SUPPORT == 1)
+        /* Format:    AT#Uart -b57600 -w7 -p1 -s1 +enter*/
+        if (!memcmp(uip_appdata,AT_CMD_UART,sizeof(AT_CMD_UART)-1)) {
+            result = iot_exec_atcmd_uart(uip_appdata, uip_datalen());
+        }
+#endif
     }
 
     if (uip_poll()) {
         /* below codes shows how to send data to client  */
-		if(strlen(result)) {
-			uip_send(result, strlen(result)+1);
-			memset(result, 0, sizeof(result));
-		}
+        if(result == 0) {
+            uip_send("OK\n", strlen("OK\n")+1);
+            result = 0xff;
+        }
     }
 }
 #endif

@@ -452,7 +452,7 @@ bool load_sta_cfg(void)
         bFlashInit = TRUE;    /*if has valid setting in flash,  direct go Scan state, but not do smart connect*/
     }
 #else
-	memcpy(pIoTStaCfg->Bssid, "\x11\x22\x33\x44\x55\x66", (strlen("\x11\x22\x33\x44\x55\x66") + 1));
+	memcpy(pIoTStaCfg->Bssid, "\x11\x22\x33\x44\x55\x66", strlen("\x11\x22\x33\x44\x55\x66"));
 	memcpy(pIoTStaCfg->Ssid, "DLMSniffer", (strlen("DLMSniffer") + 1));
 	pIoTStaCfg->SsidLen = strlen("DLMSniffer");
 	memcpy(pIoTStaCfg->Passphase, "12345678", (strlen("12345678") + 1));

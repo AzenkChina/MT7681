@@ -165,11 +165,11 @@ void iot_cust_subtask1(void)
 	subCurTimer = iot_get_ms_time();
 #ifdef CONFIG_SOFTAP
 	/* if the time difference is 2000ms, change gpio output value*/
-	if (subCurTimer - subPreTimer >= 500)
+	if (subCurTimer - subPreTimer >= 200)
 	{
 #else
 	/* if the time difference is 2000ms, change gpio output value*/
-	if (subCurTimer - subPreTimer >= 2000)
+	if (subCurTimer - subPreTimer >= 1000)
 	{
 #endif
 		subPreTimer = subCurTimer;
@@ -209,10 +209,10 @@ void iot_cust_init(void)
 	uint32 gpio_input[3]={0,0,0};
 
 	/*GPIO get status*/
-    for (i=0; i<=3; i++) {
+	for (i=0; i<=3; i++) {
 		for (loop=0; loop<=1000; loop++);
 		iot_gpio_input((int32)3, &gpio_input[i]);
-    }
+	}
 
 	/* read settings stored on flash Common CONFIG BLOCK */
 	spi_flash_read(FLASH_COM_CFG_BASE, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
