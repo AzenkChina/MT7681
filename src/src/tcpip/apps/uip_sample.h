@@ -41,12 +41,6 @@
 #define UDP_SRV_APP2_ENABLE       0
 #endif
 
-/***  Example for UDP CLIENT APP 1 ****/
-/*This APP make MT7681 as a UDP client, it will send UDP packet contrains "hello..."
-   message from local port5556 to IoT server port8889 every 5sec,
-   and dump the received messages from IoTserver port8889*/
-#define UDP_CLI_APP1_ENABLE       0
-
 
 /**************************************************/
 /******************UDP SERVER*********************/
@@ -68,21 +62,6 @@ extern void udp_srv_app2_init(void)  XIP_ATTRIBUTE(".xipsec0");
 extern void handle_udp_srv_app2(void);
 #endif
 
-
-/**************************************************/
-/******************UDP CLIENT**********************/
-/**************************************************/
-#if UDP_CLI_APP1_ENABLE
-#define UDP_CLI_APP1_LOCAL_PORT     5556  /*The Local UDP Client Port  if 7681 as a UDP client */
-#define UDP_CLI_APP1_REMOTE_PORT    8889  /*The Remote UDP Server Port*/
-#define UDP_CLI_APP1_IOT_SRV_IP     {192,168,32,100}  /*The Remote UDP Server IP address in WAN/LAN */
-
-
-extern void udp_cli_app1_init()  XIP_ATTRIBUTE(".xipsec0");
-extern void handle_udp_cli_app1(void);
-#endif
-void udp_client_init();
-void udp_client_sample();
 
 
 

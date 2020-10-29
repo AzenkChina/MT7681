@@ -45,9 +45,6 @@ iot_udp_app_init(void)
 #if UDP_SRV_APP2_ENABLE
     udp_srv_app2_init();
 #endif
-#if UDP_CLI_APP1_ENABLE
-    udp_cli_app1_init();
-#endif
 
     /********* Customer APP end. **********/
 
@@ -90,11 +87,6 @@ iot_udp_appcall(void)
 #ifdef CONFIG_SOFTAP
     else if (lport == DHCPC_SERVER_PORT) {
         handle_dhcpd();
-    }
-#endif
-#if UDP_CLI_APP1_ENABLE
-    else if (lport == UDP_CLI_APP1_LOCAL_PORT) {
-        handle_udp_cli_app1();
     }
 #endif
     /* Customer APP end. */
