@@ -203,7 +203,7 @@ void iot_cust_init(void)
 {
     /* run customer initial function */
 
-#if (ATCMD_RECOVERY_SUPPORT==0)
+#if (ATCMD_RECOVERY_SUPPORT==1)
 	uint8 i=0;
 	uint32 loop;
 	uint32 gpio_input[3]={0,0,0};
