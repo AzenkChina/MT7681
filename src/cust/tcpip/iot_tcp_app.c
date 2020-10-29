@@ -5,6 +5,12 @@
 #include "string.h"
 #include "webclient.h"
 #include "uip_timer.h"
+#if (ATCMD_SUPPORT == 0)
+#if (UART_INTERRUPT == 1)
+#include "bmd.h"
+#include "uart_sw.h"
+#endif
+#endif
 
 extern IOT_ADAPTER       IoTpAd;
 extern u8_t gCurrentAddress[];
@@ -12,6 +18,11 @@ extern u16_t http_clientPort;
 #if UIP_CLOUD_SERVER_SUPPORT
 extern u16_t TCP_cloudClientPort;
 ClientActivationInfo mt76xx_Activation;
+#endif
+#if (ATCMD_SUPPORT == 0)
+#if (UART_INTERRUPT == 1)
+extern UARTStruct UARTPort;
+#endif
 #endif
 /*---------------------------------------------------------------------------*/
 /*
@@ -122,6 +133,14 @@ handle_tcp_app(void)
     */
     struct iot_tcp_app_state *s = &(uip_conn->appstate);
     u16_t lport = HTONS(uip_conn->lport);
+#if (ATCMD_SUPPORT == 0)
+#if (UART_INTERRUPT == 1)
+    int16  i = 0;
+    int16 rx_len = 0;
+    BUFFER_INFO *rx_ring = &(UARTPort.Rx_Buffer);
+    char *cptr;
+#endif
+#endif
 
     if (uip_aborted() || uip_timedout() || uip_closed()) {
         printf("fd %d uip_aborted.%d\n", uip_conn->fd, HTONS(uip_conn->lport));
@@ -196,7 +215,20 @@ handle_tcp_app(void)
         if (s->state == IOT_APP_S_CLOSED) {
             uip_close();
         } else {
-			//...
+#if (UART_INTERRUPT == 1)
+            cptr = (char *)uip_appdata;
+            Buf_GetBytesAvail(rx_ring, rx_len);
+            if(rx_len <= 0) {
+                return;
+            }
+            for (i = 0; i < rx_len; i++) {
+                if(i >= uip_mss()) {
+                    break;
+                }
+                Buf_Pop(rx_ring, cptr[i]);
+            }
+            uip_send(uip_appdata, i);
+#endif
         }
 #endif
     }
