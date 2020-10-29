@@ -29,14 +29,6 @@ int iot_netif_cfg(u8_t *ip, u8_t *mask, u8_t * gw, u8_t *dns)
         }
         uip_setdraddr(addr);
 
-#if CFG_SUPPORT_DNS
-        if (uiplib_ipaddrconv((char *)dns,(unsigned char *)&addr) == 0) {
-            return -4;
-        }
-
-        resolv_conf(addr);
-        resolv_query("www.baidu.com");
-#endif
         dhcpc_set_state(STATE_CONFIG_DONE);
         return 0;
     }

@@ -6,9 +6,6 @@
 #include "uip.h"
 #include "uiplib.h"
 #include "iot_api.h"
-#if CFG_SUPPORT_DNS
-#include "resolv.h"
-#endif
 #ifdef CONFIG_SOFTAP
 #include "dhcpd.h"
 #endif
@@ -31,11 +28,6 @@ iot_udp_app_init(void)
     dhcpc_init(gCurrentAddress, 6);
 #endif
 
-#if CFG_SUPPORT_DNS
-    /* DNS client. */
-    resolv_init();
-#endif
-
     /********* Customer APP start. **********/
 
     /********* Customer APP end. **********/
@@ -55,11 +47,6 @@ iot_udp_appcall(void)
     if (lport == DHCPC_CLIENT_PORT) {
         handle_dhcp();
     }
-#if CFG_SUPPORT_DNS
-    else if (rport == DNS_SERVER_PORT) {
-        handle_resolv();
-    }
-#endif
     /* Customer APP start. */
 #ifdef CONFIG_SOFTAP
     else if (lport == DHCPC_SERVER_PORT) {

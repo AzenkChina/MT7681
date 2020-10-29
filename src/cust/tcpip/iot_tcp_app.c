@@ -35,14 +35,6 @@ iot_tcp_app_init(void)
     uip_listen(HTONS(7684));
 #endif
 
-#if UIP_HTTP_CLIENT_SUPPORT
-    //http client setting
-    //webclient_get("192.168.1.100", HTTP_SERVER_DEFAULT_PORT, "/MT7681_sta_header.bin");
-    webclient_get("192.168.2.1", HTTP_SERVER_DEFAULT_PORT, "/index.html");
-    //printf_high("http client port:%d\n", http_clientPort);
-    uip_listen(HTONS(http_clientPort));
-#endif
-
 #if TCP_CLI_APP1_ENABLE
     tcp_cli_app1_init();
 #endif
@@ -65,13 +57,6 @@ void
 iot_tcp_appcall(void)
 {
     u16_t lport = HTONS(uip_conn->lport);
-
-#if UIP_HTTP_CLIENT_SUPPORT
-    if (lport == http_clientPort) {
-        webclient_appcall();
-        return;
-    }
-#endif
 
 #if TCP_CLI_APP1_ENABLE
     if (lport == TCP_CLI_APP1_LOCAL_PORT) {
