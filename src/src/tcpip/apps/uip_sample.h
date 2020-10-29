@@ -30,7 +30,7 @@
 /*This APP make MT7681 as a TCP server,  it will send TCP packet contrains "hello..."
     message from local port9998 to TCP Client every 5sec,
    and dump the received messages */
-#define TCP_SRV_APP1_ENABLE       0
+#define TCP_SRV_APP1_ENABLE       1
 
 /***  Example for TCP CLIENT APP 1 ****/
 /*This APP make MT7681 as a TCP Client,  it will send TCP packet contrains "hello..."

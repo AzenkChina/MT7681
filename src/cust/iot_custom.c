@@ -743,9 +743,9 @@ bool load_com_cfg(void)
         IoTpAd.ComCfg.UART_Parity     =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_UART_PARITY];
         IoTpAd.ComCfg.UART_StopBits    =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_UART_STOP_BITS];
 
-        if ((IoTpAd.ComCfg.UART_Baudrate > UART_BAUD_3200000) ||
+        if ((IoTpAd.ComCfg.UART_Baudrate < UART_BAUD_300) || (IoTpAd.ComCfg.UART_Baudrate > UART_BAUD_115200) ||
             (IoTpAd.ComCfg.UART_Parity > pa_space) ||
-            ((IoTpAd.ComCfg.UART_DataBits < len_5) || (IoTpAd.ComCfg.UART_DataBits > len_8))  ||
+            ((IoTpAd.ComCfg.UART_DataBits < len_7) || (IoTpAd.ComCfg.UART_DataBits > len_8))  ||
             ((IoTpAd.ComCfg.UART_StopBits < sb_1)  || (IoTpAd.ComCfg.UART_StopBits > sb_1_5)) ) {
             default_uart_cfg();
         }

@@ -126,7 +126,9 @@ handle_tcp_app(void)
         printf("RX fd : %d\n", uip_conn->fd);
         if (lport == IoTpAd.ComCfg.Local_TCP_Srv_Port) {
 #if (UART_SUPPORT ==1)
+#if (UART_INTERRUPT == 1)
             iot_uart_output(uip_appdata, (int16)uip_datalen());
+#endif
 #endif
         } else {
 #if ATCMD_TCPIP_SUPPORT
@@ -149,6 +151,7 @@ handle_tcp_app(void)
         if (s->state == IOT_APP_S_CLOSED) {
             uip_close();
         } else {
+#if (UART_SUPPORT ==1)
 #if (UART_INTERRUPT == 1)
             cptr = (char *)uip_appdata;
             Buf_GetBytesAvail(rx_ring, rx_len);
@@ -162,6 +165,7 @@ handle_tcp_app(void)
                 Buf_Pop(rx_ring, cptr[i]);
             }
             uip_send(uip_appdata, i);
+#endif
 #endif
         }
 #endif
@@ -216,19 +220,78 @@ void handle_tcp_srv_app1(void)
 {
     static struct timer user_timer; //create a timer;
     static bool app_init = FALSE;
+    char result[32];
+
+    memset(result, 0, sizeof(result));
 
     if (uip_newdata()) {
-        printf_high("Server RX [%d] bytes\n", uip_datalen());
-        iot_uart_output(uip_appdata, uip_datalen());
+ 	if(strcmp(uip_appdata,  "AT#300") == 0) {
+		strcpy(result, "AT#300");
+	}
+	else if(strcmp(uip_appdata,  "AT#600") {
+		strcpy(result, "AT#600");
+	}
+	else if(strcmp(uip_appdata,  "AT#1200") {
+		strcpy(result, "AT#1200");
+	}
+	else if(strcmp(uip_appdata,  "AT#2400") {
+		strcpy(result, "AT#2400");
+	}
+	else if(strcmp(uip_appdata,  "AT#4800") {
+		strcpy(result, "AT#4800");
+	}
+	else if(strcmp(uip_appdata,  "AT#7200") {
+		strcpy(result, "AT#7200");
+	}
+	else if(strcmp(uip_appdata,  "AT#9600") {
+		strcpy(result, "AT#9600");
+	}
+	else if(strcmp(uip_appdata,  "AT#14400") {
+		strcpy(result, "AT#14400");
+	}
+	else if(strcmp(uip_appdata,  "AT#19200") {
+		strcpy(result, "AT#19200");
+	}
+	else if(strcmp(uip_appdata,  "AT#28800") {
+		strcpy(result, "AT#28800");
+	}
+	else if(strcmp(uip_appdata,  "AT#33900") {
+		strcpy(result, "AT#33900");
+	}
+	else if(strcmp(uip_appdata,  "AT#38400") {
+		strcpy(result, "AT#38400");
+	}
+	else if(strcmp(uip_appdata,  "AT#57600") {
+		strcpy(result, "AT#57600");
+	}
+	else if(strcmp(uip_appdata,  "AT#115200") {
+		strcpy(result, "AT#115200");
+	}
+	else if(strcmp(uip_appdata,  "AT#7") {
+		strcpy(result, "AT#7");
+	}
+	else if(strcmp(uip_appdata,  "AT#8") {
+		strcpy(result, "AT#8");
+	}
+	else if(strcmp(uip_appdata,  "AT#none") {
+		strcpy(result, "AT#none");
+	}
+	else if(strcmp(uip_appdata,  "AT#even") {
+		strcpy(result, "AT#even");
+	}
+	else if(strcmp(uip_appdata,  "AT#odd") {
+		strcpy(result, "AT#odd");
+	}
     }
 
     if (uip_poll()) {
         /* below codes shows how to send data to client  */
         if ((app_init == FALSE) || timer_expired(&user_timer)) {
-            printf_high("TCP SERVER APP1 uip_poll_timer_expired\n");
-            uip_send("hello,this is tcp srv...", 24);
-            timer_set(&user_timer, 5*CLOCK_SECOND);
-            app_init = TRUE;
+            if(strlen(result)) {
+                uip_send(result, strlen(result)+1);
+                timer_set(&user_timer, 5*CLOCK_SECOND);
+                app_init = TRUE;
+            }
         }
     }
 }
