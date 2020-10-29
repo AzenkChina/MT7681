@@ -154,6 +154,7 @@ handle_tcp_app(void)
     }
 
     if (uip_connected()) {
+#if (ATCMD_SUPPORT != 0)
         u8_t raddr[16];
         u8_t logon_msg[16] = "userlogon:";
 
@@ -163,6 +164,7 @@ handle_tcp_app(void)
 
         printf_high("Connected fd:%d,lp:%d,ra:%s,rp:%d\n",
                     uip_conn->fd, HTONS(uip_conn->lport), raddr, HTONS(uip_conn->rport));
+#endif
 
 #if ENABLE_DATAPARSING_SEQUENCE_MGMT
         IoT_cp_app_connection_connected(uip_conn->fd

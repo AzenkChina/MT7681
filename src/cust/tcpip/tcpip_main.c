@@ -131,7 +131,9 @@ int netif_rx(u8_t *p, u16_t len)
     if (len <= UIP_BUFSIZE + 2) {
         mt76xx_dev_read(p, len);
     } else {
+#if (ATCMD_SUPPORT != 0)
         printf_high("netif_rx length error: %d > %d\n", len, UIP_BUFSIZE + 2);
+#endif
         return -1;
     }
 
@@ -204,7 +206,10 @@ void tcpip_periodic_timer()
 void
 uip_log(char *m)
 {
+#if (ATCMD_SUPPORT != 0)
     printf_high("UIP log: %s\n", m);
+#endif
+
 }
 
 #ifdef __DHCPC_H__

@@ -70,7 +70,9 @@ int16 iot_uart_output (uint8 *msg, int16 count)
 {
 
     if ((msg == NULL) || (count <= 0))   {
+#if (ATCMD_SUPPORT != 0)
         printf_high("%s,%d: invalid input \n",__FUNCTION__,__LINE__);
+#endif
         return 0;
     }
     return uart_put_bytes(msg,(uint16)count);
