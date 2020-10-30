@@ -378,6 +378,21 @@ int32 iot_atcmd_uart_atcfg(puchar pCmdBuf, int16 AtCmdLen)
     split_string_cmd(pCmdBuf, AtCmdLen, &argc, argv);
     opt = getopt(argc, argv, opString);
 
+	/* read settings stored on flash Common CONFIG BLOCK */
+	spi_flash_read(FLASH_COM_CFG_BASE, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
+	if(IoTpAd.flash_rw_buf[FLASH_COM_CFG_INFO_STORED] != COMMON_INFO_STORED) {
+		memset(IoTpAd.flash_rw_buf ,0xff, sizeof(IoTpAd.flash_rw_buf));
+		default_boot_cfg();
+		default_uart_cfg();
+		default_ip_cfg();
+		IoTpAd.flash_rw_buf[FLASH_COM_CFG_INFO_STORED] = COMMON_INFO_STORED;
+		IoTpAd.flash_rw_buf[FLASH_COM_CFG_BOOT_IDX] = DEFAULT_BOOT_FW_IDX;
+		IoTpAd.flash_rw_buf[FLASH_COM_CFG_RECOVERY_MODE_STATUS] = DEFAULT_RECOVERY_MODE_STATUS;
+		IoTpAd.flash_rw_buf[FLASH_COM_CFG_IO_SET] = DEFAULT_IO_MODE;
+	}
+
+	spi_flash_erase_sector(FLASH_COM_CFG_BASE);
+
     while (opt != -1) {
         switch (opt)  {
             case 'b':
@@ -414,6 +429,9 @@ int32 iot_atcmd_uart_atcfg(puchar pCmdBuf, int16 AtCmdLen)
         }
         opt = getopt(argc, argv, opString);
     }
+
+	spi_flash_write(FLASH_COM_CFG_BASE, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
+
     return 0;
 }
 

@@ -197,23 +197,28 @@ void handle_tcp_srv_app1(void)
 void handle_tcp_srv_app2(void)
 {
 #if (UART_SUPPORT ==1)
+#if (ATCMD_SUPPORT == 0)
     int16  i = 0;
     int16 rx_len = 0;
     BUFFER_INFO *rx_ring = &(UARTPort.Rx_Buffer);
     char *cptr;
 #endif
+#endif
 
     if (uip_newdata()) {
 #if (UART_SUPPORT ==1)
+#if (ATCMD_SUPPORT == 0)
             if(uip_datalen() > 0) {
             	iot_uart_output(uip_appdata, (int16)uip_datalen());
             }
+#endif
 #endif
     }
 
     if (uip_poll()) {
         /* below codes shows how to send data to client  */
 #if (UART_SUPPORT ==1)
+#if (ATCMD_SUPPORT == 0)
             cptr = (char *)uip_appdata;
             Buf_GetBytesAvail(rx_ring, rx_len);
             if(rx_len <= 0) {
@@ -227,6 +232,7 @@ void handle_tcp_srv_app2(void)
             }
             uip_send(uip_appdata, i);
 #endif
+#endif
     }
 }
 #endif
@@ -236,6 +242,7 @@ void handle_tcp_srv_app3(void)
 {
 	static uint8  set=0, event=0;
 	static uint8 sta = 0xff;
+	static struct timer user_timer;
 	char *cptr;
 	uint32 gpio_set, gpio_event;
 
@@ -259,11 +266,12 @@ void handle_tcp_srv_app3(void)
 		cptr = (char *)uip_appdata;
 		iot_gpio_input((int32)0, &gpio_set);
 		iot_gpio_input((int32)1, &gpio_event);
-		if((gpio_set != set) || (gpio_event != event)) {
+		if((gpio_set != set) || (gpio_event != event) || timer_expired(&user_timer)) {
 			set = gpio_set;
 			event = gpio_event;
 			sprintf(uip_appdata, "S%cE%c\n", (set?'1':'0'), (event?'1':'0'));
 			uip_send(uip_appdata, (strlen("S0E0\n")+1));
+			timer_set(&user_timer, 5*CLOCK_SECOND);
 		}
 	        else if(sta != 0xff) {
 			sprintf(uip_appdata, "STA%c\n", (sta?'1':'0'));
