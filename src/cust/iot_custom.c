@@ -226,10 +226,8 @@ void iot_cust_init(void)
 			if(IoTpAd.flash_rw_buf[FLASH_COM_CFG_BOOT_IDX] != 1)
 			{
 				spi_flash_erase_sector(FLASH_COM_CFG_BASE);
-				memset(IoTpAd.flash_rw_buf ,0xff, sizeof(IoTpAd.flash_rw_buf));
 
 				default_boot_cfg();
-				default_uart_cfg();
 				default_ip_cfg();
 
 				IoTpAd.flash_rw_buf[FLASH_COM_CFG_INFO_STORED]			= COMMON_INFO_STORED;
@@ -244,10 +242,8 @@ void iot_cust_init(void)
 			if(IoTpAd.flash_rw_buf[FLASH_COM_CFG_BOOT_IDX] != DEFAULT_BOOT_FW_IDX)
 			{
 				spi_flash_erase_sector(FLASH_COM_CFG_BASE);
-				memset(IoTpAd.flash_rw_buf ,0xff, sizeof(IoTpAd.flash_rw_buf));
 
 				default_boot_cfg();
-				default_uart_cfg();
 				default_ip_cfg();
 
 				IoTpAd.flash_rw_buf[FLASH_COM_CFG_INFO_STORED]			= COMMON_INFO_STORED;
