@@ -247,14 +247,15 @@ void handle_tcp_srv_app3(void)
 	uint32 gpio_set, gpio_event;
 
     if (uip_newdata()) {
+	sta = 0xff;
 	cptr = (char *)uip_appdata;
 	if(uip_datalen() >= 4) {
 		cptr[4] = 0;
-		if(memcmp(cptr, "STA0", 4) == 0) {
+		if(strcmp(cptr, "STA0") == 0) {
 			 iot_gpio_output(2,  0);
 			 sta = 0;
 		}
-		if(memcmp(cptr, "STA1", 4) == 0) {
+		else if(strcmp(cptr, "STA1") == 0) {
 			iot_gpio_output(2,  1);
 			sta = 1;
 		}
