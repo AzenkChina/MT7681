@@ -69,10 +69,10 @@
 #define DEFAULT_UART_STOP_BITS           sb_1
 
 #define DEFAULT_TCP_UDP_CS                  1       /*0: UDP,  1:TCP  (Default 3*Client, 1*Server is Open)*/
-#define DEFAULT_IOT_TCP_SRV_PORT      4059    /*The IoT Server TCP Port  in the internet */
-#define DEFAULT_LOCAL_TCP_SRV_PORT  4059    /*The TCP Port  if 7681 as a TCP server */
-#define DEFAULT_IOT_UDP_SRV_PORT      4059    /*The IoT Server UDP Port  in the internet */
-#define DEFAULT_LOCAL_UDP_SRV_PORT  4059    /*The UDP  Port  if 7681 as a UDP server */
+#define DEFAULT_IOT_TCP_SRV_PORT      9998    /*The IoT Server TCP Port  in the internet */
+#define DEFAULT_LOCAL_TCP_SRV_PORT  9998    /*The TCP Port  if 7681 as a TCP server */
+#define DEFAULT_IOT_UDP_SRV_PORT      9998    /*The IoT Server UDP Port  in the internet */
+#define DEFAULT_LOCAL_UDP_SRV_PORT  9998    /*The UDP  Port  if 7681 as a UDP server */
 
 #define DEFAULT_USE_DHCP                      1        /*0: Static IP,  1:Dynamic IP*/
 #define DEFAULT_STATIC_IP                     {192,168,100,80}

@@ -29,15 +29,20 @@ extern UARTStruct UARTPort;
 void
 iot_tcp_app_init(void)
 {
-    /* We start to listen for connections on TCP port 7681. */
-    uip_listen(HTONS(IoTpAd.ComCfg.Local_TCP_Srv_Port));
-
 #if TCP_CLI_APP1_ENABLE
     tcp_cli_app1_init();
 #endif
 
 #if TCP_SRV_APP1_ENABLE
     uip_listen(HTONS(TCP_SRV_APP1_LOCAL_PORT));
+#endif
+
+#if TCP_SRV_APP2_ENABLE
+    uip_listen(HTONS(TCP_SRV_APP2_LOCAL_PORT));
+#endif
+
+#if TCP_SRV_APP3_ENABLE
+    uip_listen(HTONS(TCP_SRV_APP3_LOCAL_PORT));
 #endif
 
 }
@@ -69,6 +74,20 @@ iot_tcp_appcall(void)
     }
 #endif
 
+#if TCP_SRV_APP2_ENABLE
+    if (lport == TCP_SRV_APP2_LOCAL_PORT) {
+        handle_tcp_srv_app2();
+        return;
+    }
+#endif
+
+#if TCP_SRV_APP3_ENABLE
+    if (lport == TCP_SRV_APP3_LOCAL_PORT) {
+        handle_tcp_srv_app3();
+        return;
+    }
+#endif
+
     handle_tcp_app();
 }
 
@@ -82,18 +101,8 @@ handle_tcp_app(void)
     * this to access it easier.
     */
     struct iot_tcp_app_state *s = &(uip_conn->appstate);
-    u16_t lport = HTONS(uip_conn->lport);
-#if (ATCMD_SUPPORT == 0)
-#if (UART_INTERRUPT == 1)
-    int16  i = 0;
-    int16 rx_len = 0;
-    BUFFER_INFO *rx_ring = &(UARTPort.Rx_Buffer);
-    char *cptr;
-#endif
-#endif
 
     if (uip_aborted() || uip_timedout() || uip_closed()) {
-        printf("fd %d uip_aborted.%d\n", uip_conn->fd, HTONS(uip_conn->lport));
         s->state = IOT_APP_S_CLOSED;
         s->buf = NULL;
         s->len = 0;
@@ -101,75 +110,23 @@ handle_tcp_app(void)
     }
 
     if (uip_connected()) {
-#if (ATCMD_SUPPORT != 0)
-        u8_t raddr[16];
-        u8_t logon_msg[16] = "userlogon:";
-
-        sprintf((char *)raddr, "%d.%d.%d.%d",
-                uip_ipaddr1(uip_conn->ripaddr), uip_ipaddr2(uip_conn->ripaddr),
-                uip_ipaddr3(uip_conn->ripaddr), uip_ipaddr4(uip_conn->ripaddr));
-
-        printf_high("Connected fd:%d,lp:%d,ra:%s,rp:%d\n",
-                    uip_conn->fd, HTONS(uip_conn->lport), raddr, HTONS(uip_conn->rport));
-#endif
-
         s->state = IOT_APP_S_CONNECTED;
     }
 
     if (uip_acked()) {
-        printf("uip_acked.\n");
         s->state = IOT_APP_S_DATA_ACKED;
         s->buf = NULL;
         s->len = 0;
     }
 
     if (uip_newdata()) {
-        printf("RX fd : %d\n", uip_conn->fd);
-        if (lport == IoTpAd.ComCfg.Local_TCP_Srv_Port) {
-#if (UART_SUPPORT ==1)
-#if (UART_INTERRUPT == 1)
-            iot_uart_output(uip_appdata, (int16)uip_datalen());
-#endif
-#endif
-        } else {
-#if ATCMD_TCPIP_SUPPORT
-            iot_uart_output(uip_appdata, (int16)uip_datalen());
-#endif
-        }
     }
 
     /* check if we have data to xmit for this connection.*/
     if (uip_poll()) {
-#if ATCMD_TCPIP_SUPPORT
         if (s->state == IOT_APP_S_CLOSED) {
             uip_close();
-        } else if (s->len > 0) {
-            uip_send(s->buf, s->len);
-            s->state = IOT_APP_S_DATA_SEND;
         }
-#endif
-#if (ATCMD_SUPPORT == 0)
-        if (s->state == IOT_APP_S_CLOSED) {
-            uip_close();
-        } else {
-#if (UART_SUPPORT ==1)
-#if (UART_INTERRUPT == 1)
-            cptr = (char *)uip_appdata;
-            Buf_GetBytesAvail(rx_ring, rx_len);
-            if(rx_len <= 0) {
-                return;
-            }
-            for (i = 0; i < rx_len; i++) {
-                if(i >= uip_mss()) {
-                    break;
-                }
-                Buf_Pop(rx_ring, cptr[i]);
-            }
-            uip_send(uip_appdata, i);
-#endif
-#endif
-        }
-#endif
     }
 }
 
@@ -222,12 +179,9 @@ void handle_tcp_srv_app1(void)
     static char result = 0xff;
 
     if (uip_newdata()) {
-#if (ATCMD_UART_SUPPORT == 1) && (UART_SUPPORT == 1)
-        /* Format:    AT#Uart -b57600 -w7 -p1 -s1 +enter*/
-        if (!memcmp(uip_appdata,AT_CMD_UART,sizeof(AT_CMD_UART)-1)) {
-            result = iot_exec_atcmd_uart(uip_appdata, uip_datalen());
-        }
-#endif
+	if(uip_datalen() < AT_CMD_MAX_LEN) {
+		result = iot_atcmd_parser(uip_appdata, uip_datalen());
+	}
     }
 
     if (uip_poll()) {
@@ -236,6 +190,72 @@ void handle_tcp_srv_app1(void)
             uip_send("OK\n", strlen("OK\n")+1);
             result = 0xff;
         }
+    }
+}
+#endif
+
+#if TCP_SRV_APP2_ENABLE
+void handle_tcp_srv_app2(void)
+{
+#if (ATCMD_SUPPORT == 0)
+#if (UART_INTERRUPT == 1)
+    int16  i = 0;
+    int16 rx_len = 0;
+    BUFFER_INFO *rx_ring = &(UARTPort.Rx_Buffer);
+    char *cptr;
+#endif
+#endif
+
+    if (uip_newdata()) {
+#if (UART_SUPPORT ==1)
+#if (UART_INTERRUPT == 1)
+            iot_uart_output(uip_appdata, (int16)uip_datalen());
+#endif
+#endif
+    }
+
+    if (uip_poll()) {
+        /* below codes shows how to send data to client  */
+#if (UART_SUPPORT ==1)
+#if (UART_INTERRUPT == 1)
+            cptr = (char *)uip_appdata;
+            Buf_GetBytesAvail(rx_ring, rx_len);
+            if(rx_len <= 0) {
+                return;
+            }
+            for (i = 0; i < rx_len; i++) {
+                if(i >= uip_mss()) {
+                    break;
+                }
+                Buf_Pop(rx_ring, cptr[i]);
+            }
+            uip_send(uip_appdata, i);
+#endif
+#endif
+    }
+}
+#endif
+
+#if TCP_SRV_APP3_ENABLE
+void handle_tcp_srv_app3(void)
+{
+    static uint8  set=0, event=0;
+    char *cptr;
+    uint32 gpio_set, gpio_event;
+
+    if (uip_newdata()) {
+    }
+
+    if (uip_poll()) {
+		cptr = (char *)uip_appdata;
+		iot_gpio_input((int32)0, &gpio_set);
+		iot_gpio_input((int32)1, &gpio_event);
+		if((gpio_set != set) || (gpio_event != event)) {
+			set = gpio_set;
+			event = gpio_event;
+			sprintf(uip_appdata, "S%cE%c\n", (set?1:0), (event?1:0));
+			uip_send(uip_appdata, i);
+		}
     }
 }
 #endif

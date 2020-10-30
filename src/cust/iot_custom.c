@@ -328,13 +328,10 @@ void cust_subtask(void)
 ========================================================================*/
 void cust_app_init(void)
 {
-    uint8 i=0;
-
 #if (ATCMD_RECOVERY_SUPPORT==0)
     /*GPIO initial*/
-    for (i=0; i<=4; i++) {
-        iot_gpio_output(i, iot_gpio_defval());
-    }
+    iot_gpio_output(2, iot_gpio_defval());
+    iot_gpio_output(4, iot_gpio_defval());
 #endif
 
 #if (IOT_SMP_RSSI_COLLECT == 1)
