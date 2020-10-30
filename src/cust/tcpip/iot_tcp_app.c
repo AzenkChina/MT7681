@@ -197,7 +197,7 @@ void handle_tcp_srv_app1(void)
 #if TCP_SRV_APP2_ENABLE
 void handle_tcp_srv_app2(void)
 {
-#if (ATCMD_SUPPORT == 0)
+#if (UART_SUPPORT ==1)
 #if (UART_INTERRUPT == 1)
     int16  i = 0;
     int16 rx_len = 0;
