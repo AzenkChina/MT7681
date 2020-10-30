@@ -5,7 +5,7 @@
 #include "string.h"
 #include "uip_timer.h"
 #include "iot_custom.h"
-#if (ATCMD_SUPPORT == 0)
+#if (UART_SUPPORT == 1)
 #if (UART_INTERRUPT == 1)
 #include "bmd.h"
 #include "uart_sw.h"
@@ -15,7 +15,7 @@
 extern IOT_ADAPTER       IoTpAd;
 extern u8_t gCurrentAddress[];
 extern u16_t http_clientPort;
-#if (ATCMD_SUPPORT == 0)
+#if (UART_SUPPORT == 1)
 #if (UART_INTERRUPT == 1)
 extern UARTStruct UARTPort;
 #endif
