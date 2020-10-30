@@ -95,50 +95,23 @@
 /* if one or more paramter following the command type*/
 /* please reserve a space after command type*/
 #define        AT_CMD_UART                 "Uart "
-#define        AT_CMD_NETMODE          "Netmode "
-#define        AT_CMD_WIFI_CFG         "WifiConf "
-#define        AT_CMD_CON_AP             "ConAP "
 #define        AT_CMD_CHANNEL           "Channel "
 #define        AT_CMD_SOFTAP_CFG     "SoftAPConf "
-#define        AT_CMD_DHCP                 "Dhcp "
-#define        AT_CMD_STATIC_IP        "StaticIP "
-#define        AT_CMD_UART2WIFI       "Uart2WiFi"
 #define        AT_CMD_VER                    "Ver"
 #define        AT_CMD_REBOOT             "Reboot"
 #define        AT_CMD_DEFAULT           "Default"
-#define        AT_CMD_SET_SMNT         "Smnt"
 
-#define        AT_CMD_TCPUDP             "TcpUdp "        /*set tcp/udp*/
-#define        AT_CMD_TCPUDP_MODE  "TcpUdpMode "    /*set server/client*/
-#define        AT_CMD_SLEEP                "Sleep "
-#define        AT_CMD_STANDBY           "Standby "
-#define        AT_CMD_WAKEUP            "WakeUp"
-#define        AT_CMD_IFCONFIG          "ifconfig"
-#define        AT_CMD_IWLIST              "iwlist"
-#define        AT_CMD_SHOW                "Show"
-#define        AT_CMD_TCPCONNECT     "Tcp_Connect "
-#define        AT_CMD_TCPSEND           "Tcp_Send "
-#define        AT_CMD_TCPDISCONNECT  "Tcp_Disconnect "
-#define        AT_CMD_TCPLISTEN        "Tcp_Listen "
-
-#define        AT_CMD_UDPCREATE       "Udp_Create "
-#define        AT_CMD_UDPSEND           "Udp_Send "
-#define        AT_CMD_UDPREMOVE       "Udp_Remove "
 #define        AT_CMD_UPDATEFW        "UpdateFW"
 
 #define        AT_CMD_ATE_CAL            "ATECAL "
 #define        AT_CMD_EFUSE_SET        "EFUSE "
 #define        AT_CMD_FLASH_SET        "FLASH "
 
-#define        AT_CMD_STATIC_IP         "StaticIP "
-#define        AT_CMD_JTAGMODE         "Jtag"
-#define        AT_CMD_NETSTAT            "Netstat "
 
 /*Only for Debug*/
 #define        AT_CMD_MAC_SET           "MAC "
 #define        AT_CMD_BBP_SET            "BBP "
 #define        AT_CMD_RF_SET              "RF "
-#define        AT_CMD_SLT_CTL             "SLT"
 #define        AT_CMD_PS_SET              "PowerSaving "
 
 

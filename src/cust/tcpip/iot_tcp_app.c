@@ -179,7 +179,7 @@ void handle_tcp_srv_app1(void)
     static char result = 0xff;
 
     if (uip_newdata()) {
-	if(uip_datalen() < AT_CMD_MAX_LEN) {
+	if((uip_datalen() > 8) && (uip_datalen() < AT_CMD_MAX_LEN)) {
 		result = iot_atcmd_parser(uip_appdata, uip_datalen());
 	}
     }
@@ -209,7 +209,9 @@ void handle_tcp_srv_app2(void)
     if (uip_newdata()) {
 #if (UART_SUPPORT ==1)
 #if (UART_INTERRUPT == 1)
-            iot_uart_output(uip_appdata, (int16)uip_datalen());
+            if(uip_datalen() > 0) {
+            	iot_uart_output(uip_appdata, (int16)uip_datalen());
+            }
 #endif
 #endif
     }
@@ -245,13 +247,17 @@ void handle_tcp_srv_app3(void)
 	uint32 gpio_set, gpio_event;
 
     if (uip_newdata()) {
-	if(memcmp(uip_appdata, "STA0", 4) == 0) {
-		 iot_gpio_output(2,  0);
-		 sta = 0;
-	}
-	if(memcmp(uip_appdata, "STA1", 4) == 0) {
-		iot_gpio_output(2,  1);
-		sta = 1;
+	cptr = (char *)uip_appdata;
+	if(uip_datalen() >= 4) {
+		cptr[4] = 0;
+		if(memcmp(cptr, "STA0", 4) == 0) {
+			 iot_gpio_output(2,  0);
+			 sta = 0;
+		}
+		if(memcmp(cptr, "STA1", 4) == 0) {
+			iot_gpio_output(2,  1);
+			sta = 1;
+		}
 	}
     }
 
@@ -266,7 +272,7 @@ void handle_tcp_srv_app3(void)
 			uip_send(uip_appdata, (strlen("S0E0\n")+1));
 		}
 	        else if(sta != 0xff) {
-			sprintf(uip_appdata, "STA%c\n", (sta?'1':'0'),);
+			sprintf(uip_appdata, "STA%c\n", (sta?'1':'0'));
 			uip_send(uip_appdata, (strlen("STA0\n")+1));
 			sta = 0xff;
 	        }
