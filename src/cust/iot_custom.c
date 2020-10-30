@@ -160,13 +160,19 @@ void iot_cust_subtask1(void)
 	/* get current counter value (unit:1ms) */
 	subCurTimer = iot_get_ms_time();
 #ifdef CONFIG_SOFTAP
-	/* if the time difference is 2000ms, change gpio output value*/
+	/* if the time difference is 200ms, change gpio output value*/
 	if (subCurTimer - subPreTimer >= 200)
+	{
+#else
+#if (ATCMD_RECOVERY_SUPPORT==1)
+	/* if the time difference is 2000ms, change gpio output value*/
+	if (subCurTimer - subPreTimer >= 50)
 	{
 #else
 	/* if the time difference is 2000ms, change gpio output value*/
 	if (subCurTimer - subPreTimer >= 1000)
 	{
+#endif
 #endif
 		subPreTimer = subCurTimer;
 		iot_gpio_read(4, &input, &polarity); /*get gpio mode and value*/
