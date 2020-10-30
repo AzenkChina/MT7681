@@ -68,7 +68,7 @@ void handle_tcp_srv_app3(void);
 /******************TCP CLIENT**********************/
 /**************************************************/
 #if TCP_CLI_APP1_ENABLE
-#define TCP_CLI_APP1_LOCAL_PORT       9999   /*The Local TCP Client Port if MT7681 as a TCP client */
+#define TCP_CLI_APP1_LOCAL_PORT       8888   /*The Local TCP Client Port if MT7681 as a TCP client */
 #define TCP_CLI_APP1_REMOTE_PORT    7777   /*The Remote TCP Server Port in the WAN/LAN */
 #define TCP_CLI_APP1_IOT_SRV_IP        {192,168,100,1}  /*The Remote TCP Server IP Address in the WAN/LAN */
 

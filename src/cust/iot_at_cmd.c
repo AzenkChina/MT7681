@@ -652,14 +652,6 @@ int16 iot_exec_atcmd_ps_set(puchar pCmdBuf, int16 AtCmdLen)
 }
 #endif
 
-
-#if (ATCMD_NET_MODE_SUPPORT == 1)
-int16 iot_exec_atcmd_netmode(puchar pCmdBuf, int16 AtCmdLen)
-{
-    return -1;
-}
-#endif
-
 #if (ATCMD_CH_SWITCH_SUPPORT == 1)
 /*========================================================================
     Routine    Description:
@@ -831,24 +823,6 @@ void iot_atcmd_exec_reboot(void)
 }
 #endif
 
-#if (ATCMD_SET_SMNT_SUPPORT == 1)
-/*========================================================================
-    Routine Description:
-        iot_atcmd_exec_smnt -- Enable Smart Connection
-        System will enter into SmartConnection State,  until System get IP from AP or System Reboot
-
-    Arguments:
-    Return Value: 0 is success,  -1 is out of memory
-    Note:
-========================================================================*/
-int16 iot_atcmd_exec_smnt(puchar pCmdBuf)
-{
-    pIoTMlme->ATSetSmnt = TRUE;
-    wifi_state_chg(WIFI_STATE_INIT, 0);
-    return 0;
-}
-#endif
-
 
 #if (ATCMD_GET_VER_SUPPORT == 1)
 /*========================================================================
@@ -889,45 +863,6 @@ int16 iot_atcmd_exec_ver(puchar pCmdBuf)
 }
 #endif
 
-#if (ATCMD_JTAGMODE_SUPPORT == 1)
-void iot_exec_atcmd_jtag_switch(puchar pCmdBuf, int16 AtCmdLen)
-{
-    int16 argc = 0;
-    char *argv[MAX_OPTION_COUNT];
-    char *opString = "m:?";
-    char opt=0;
-    char *endptr;
-
-    uint8 switch_on=0;
-    uint8 content=0;
-
-    memset(argv,0,4*MAX_OPTION_COUNT);
-    split_string_cmd(pCmdBuf, AtCmdLen, &argc, argv);
-    opt = getopt(argc, argv, opString);
-
-    while (opt != -1) {
-        switch (opt) {
-            case 'm':
-                switch_on =  (uint8) simple_strtoul(optarg,&endptr,10);
-                //printf_high("1:%s,%d\n",optarg, socket);
-                content++;
-                break;
-            case '?':
-            default:
-                break;
-        }
-        opt = getopt(argc, argv, opString);
-    }
-
-    if (content == 1)
-        iot_jtag_mode_switch(switch_on);
-    else
-        iot_jtag_mode_get();
-
-    return;
-}
-#endif
-
 
 int16 iot_atcmd_parser(puchar cmd_buf, int16 AtCmdLen)
 {
@@ -951,21 +886,10 @@ int16 iot_atcmd_parser(puchar cmd_buf, int16 AtCmdLen)
         reset_cfg();
         iot_linkdown(0);   //disable Link Down to fix STA machine keeps SMNT and no reponse
     }
-#if (ATCMD_SET_SMNT_SUPPORT == 1)
-    /* Format:  AT#Smnt+enter*/
-    else if (!memcmp(cmd_buf,AT_CMD_SET_SMNT,sizeof(AT_CMD_SET_SMNT)-1)) {
-        ret_code = iot_atcmd_exec_smnt(cmd_buf);
-    }
-#endif
 #if (ATCMD_GET_VER_SUPPORT == 1)
     /* Format:  AT#Ver+enter*/
     else if (!memcmp(cmd_buf,AT_CMD_VER,sizeof(AT_CMD_VER)-1)) {
         ret_code = iot_atcmd_exec_ver(cmd_buf);
-    }
-#endif
-#if (ATCMD_NET_MODE_SUPPORT == 1)
-    else if (!memcmp(cmd_buf,AT_CMD_NETMODE,sizeof(AT_CMD_NETMODE)-1)) {
-        ret_code = iot_exec_atcmd_netmode(cmd_buf, AtCmdLen);
     }
 #endif
 #if (ATCMD_REBOOT_SUPPORT == 1)
@@ -1044,56 +968,12 @@ int16 iot_atcmd_parser(puchar cmd_buf, int16 AtCmdLen)
     }
 #endif
 
-    /*jinchuan  These functions developping is pending, no plan to use */
-#if  0 //(ATCMD_TCPIP_SUPPORT == 1) && (CFG_SUPPORT_TCPIP == 1)
-
-    /* Format:    AT#Tcp_Connect -a192.168.1.131 -p1234 +enter*/
-    else if (!memcmp(cmd_buf,AT_CMD_TCPCONNECT,sizeof(AT_CMD_TCPCONNECT)-1)) {
-        iot_tcpip_connect(cmd_buf, AtCmdLen);
-    }
-    /* Format:    AT#Tcp_Send -s1 -dtest data +enter*/
-    else if (!memcmp(cmd_buf,AT_CMD_TCPSEND,sizeof(AT_CMD_TCPSEND)-1)) {
-        iot_tcpip_send(cmd_buf, AtCmdLen);
-    }
-    /* Format:    AT#Tcp_Listen -p7682 +enter*/
-    else if (!memcmp(cmd_buf,AT_CMD_TCPLISTEN,sizeof(AT_CMD_TCPLISTEN)-1)) {
-        iot_tcpip_listen(cmd_buf, AtCmdLen);
-    }
-    /* Format:    AT#Tcp_Disconnect -s0 +enter*/
-    else if (!memcmp(cmd_buf,AT_CMD_TCPDISCONNECT,sizeof(AT_CMD_TCPDISCONNECT)-1)) {
-        iot_tcpip_disconnect(cmd_buf, AtCmdLen);
-    }
-    /* Format:    AT#Udp_Create -a192.168.1.132 -r1234 -l4321 +enter*/
-    else if (!memcmp(cmd_buf,AT_CMD_UDPCREATE,sizeof(AT_CMD_UDPCREATE)-1)) {
-        iot_tcpip_udp_creat(cmd_buf, AtCmdLen);
-    }
-    /* Format:    AT#Udp_Remove -s130 +enter*/
-    else if (!memcmp(cmd_buf,AT_CMD_UDPREMOVE,sizeof(AT_CMD_UDPREMOVE)-1)) {
-        iot_tcpip_udp_del(cmd_buf, AtCmdLen);
-    }
-    /* Format:    AT#Udp_Send -s130 -d1234 -a192.168.1.132 -r1234 +enter*/
-    else if (!memcmp(cmd_buf,AT_CMD_UDPSEND,sizeof(AT_CMD_UDPSEND)-1)) {
-        iot_tcpip_udp_send(cmd_buf, AtCmdLen);
-    }
-    /* Format:    AT#StaticIP -i192.168.1.100 -m255.255.255.0 -g192.168.1.1 -d172.26.2.185 +enter*/
-    else if (!memcmp(cmd_buf,AT_CMD_STATIC_IP,sizeof(AT_CMD_STATIC_IP)-1)) {
-        iot_tcpip_set_static_ip(cmd_buf, AtCmdLen);
-    } else if (!memcmp(cmd_buf,AT_CMD_NETSTAT,sizeof(AT_CMD_NETSTAT)-1)) {
-
-        iot_tcpip_netstat(cmd_buf, AtCmdLen);
-    }
-#endif
 #if (ATCMD_UART_FW_SUPPORT == 1) && (UART_SUPPORT == 1)
     /* Format:    AT#UpdateFW+enter   (the range of type is [1~7] ) */
     else if (!memcmp(cmd_buf,AT_CMD_UPDATEFW,sizeof(AT_CMD_UPDATEFW)-1)) {
         iot_xmodem_update_fw_start(); /*Disable Uart Rx Interrupt*/
         iot_xmodem_update_fw();
         iot_xmodem_update_fw_stop();  /*Restore Uart Rx Interrupt*/
-    }
-#endif
-#if (ATCMD_JTAGMODE_SUPPORT == 1)
-    else if (!memcmp(cmd_buf,AT_CMD_JTAGMODE,sizeof(AT_CMD_JTAGMODE)-1)) {
-        iot_exec_atcmd_jtag_switch(cmd_buf, AtCmdLen);
     }
 #endif
 

@@ -985,15 +985,6 @@ int16   IoT_cp_app_set_seq(uint8 fd, uint16 seq);
 struct cp_app_conn * IoT_cp_app_search_connection(uint8 fd);
 void  uip_send(const void *data, uint16 len) XIP_ATTRIBUTE(".xipsec0");
 
-/******************************************************************************
- * FUNCTIONS DEFINITION  -- MTK SmartConnection
- ******************************************************************************/
-#ifdef CONFIG_STATION
-#if (CFG_SUPPORT_MTK_SMNT == 1)
-void SMTCN_process(void) XIP_ATTRIBUTE(".xipsec0");
-void SMTCN_state_chg_init(void) XIP_ATTRIBUTE(".xipsec0");
-#endif
-#endif
 
 /*
 * password - ascii string up to 63 characters in length

@@ -280,17 +280,6 @@ void STAHandleRxDataFrame(
 
 #else
     switch (pIoTMlme->CurrentWifiState) {
-        case WIFI_STATE_SMTCNT:
-#if (CFG_SUPPORT_MTK_SMNT == 1)
-            /*implement MTK smart connection if there is no customer callback for smart connection*/
-            SMTCNRXFrameHandle(pRxBlk->pData, pRxBlk->pRxWI->MPDUtotalByteCount);
-#else
-    {
-        //customer smart connect process
-        //collect smnt connection packet
-    }
-#endif
-            break;
         case WIFI_STATE_4WAY:
         case WIFI_STATE_CONNED:
             //skip 802.11 and SNAP header
@@ -598,12 +587,6 @@ bool WifiRxFsIntFilterOut(pBD_t RxpBufDesc)
                 if ((subtype == SUBTYPE_NULL_FUNC) || (subtype == SUBTYPE_QOS_NULL))
                     return TRUE;
             }
-#if (CFG_SUPPORT_MTK_SMNT == 1)
-            else if (type == BTYPE_MGMT) {
-                if (subtype == SUBTYPE_BEACON)
-                    return TRUE;
-            }
-#endif
             break;
         case WIFI_STATE_CONNED:
             /*The Mcast, Bcast bits shall be set as 1, if Received Packet is Broadcast  */

@@ -239,23 +239,14 @@ int16 iot_exec_atcmd_efuse_set(puchar pCmdBuf, int16 AtCmdLen)  XIP_ATTRIBUTE(".
 #if (ATCMD_CH_SWITCH_SUPPORT == 1)
 int16 iot_exec_atcmd_ch_switch(puchar pCmdBuf, int16 AtCmdLen) XIP_ATTRIBUTE(".xipsec0");
 #endif
-#if (ATCMD_NET_MODE_SUPPORT == 1)
-int16 iot_exec_atcmd_netmode(puchar pCmdBuf, int16 AtCmdLen)  XIP_ATTRIBUTE(".xipsec0");
-#endif
 #ifdef CONFIG_SOFTAP
 int16 iot_exec_atcmd_conf_softap(puchar pCmdBuf, int16 AtCmdLen)  XIP_ATTRIBUTE(".xipsec0");
 #endif
 #if (ATCMD_REBOOT_SUPPORT == 1)
 void iot_atcmd_exec_reboot(void)  XIP_ATTRIBUTE(".xipsec0");
 #endif
-#if (ATCMD_SET_SMNT_SUPPORT == 1)
-int16 iot_atcmd_exec_smnt(puchar pCmdBuf)  XIP_ATTRIBUTE(".xipsec0");
-#endif
 #if (ATCMD_GET_VER_SUPPORT == 1)
 int16 iot_atcmd_exec_ver(puchar pCmdBuf) XIP_ATTRIBUTE(".xipsec0");
-#endif
-#if (ATCMD_JTAGMODE_SUPPORT == 1)
-void iot_exec_atcmd_jtag_switch(puchar pCmdBuf, int16 AtCmdLen) XIP_ATTRIBUTE(".xipsec0");
 #endif
 
 #endif  /* _IOT_CUSTOM_H_ */

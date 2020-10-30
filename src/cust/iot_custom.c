@@ -123,7 +123,6 @@ bool bSpecAP = TRUE;
 void iot_cust_scan_done(void)
 {
     /* Example for customer's smart connection implementation*/
-#if (CFG_SUPPORT_MTK_SMNT == 0)
 #ifdef PMK_CAL_BY_SW
 #if (ATCMD_RECOVERY_SUPPORT == 0)
     /*Calcurate PMK by 7681 software, it will spend 6sec*/
@@ -138,7 +137,6 @@ void iot_cust_scan_done(void)
         //printf_high("keyMaterial:");
         //dump(keyMaterial, 40);
     }
-#endif
 #endif
 #endif
 
@@ -383,7 +381,6 @@ void pre_init_cfg(void)
 }
 
 #ifdef CONFIG_STATION
-#if (CFG_SUPPORT_MTK_SMNT == 0)
 /*========================================================================
     Routine    Description:
         IoT_Cust_SMNT_Sta_Chg_Init
@@ -399,16 +396,6 @@ void pre_init_cfg(void)
 
 void IoT_Cust_SMNT_Sta_Chg_Init(void)
 {
-    /* Example for customer's smart connection implementation*/
-
-    /*Smnt is valid in STA mode, and should not available in SoftAP mode*/
-    iot_set_rxfilter(0x7f93);    /*Enable Sniffer NotToMe unicast, not myBSS Packet*/
-    pIoTMlme->DataEnable = 1;  /*Enable to handle Data frame in WifiRxDoneInterruptHandle */
-
-    /* Once jump to SmartConnection State, do Initialize here for customer's SmartConnection sub stateMachine */
-    {
-        //customer smart connect state initialization
-    }
 }
 
 
@@ -421,38 +408,7 @@ void IoT_Cust_SMNT_Sta_Chg_Init(void)
 ========================================================================*/
 void IoT_Cust_SM_Smnt(void)
 {
-    /* Example for customer's smart connection implementation*/
-
-    /*Step1:  create parameter to store the smnt information */
-    /* or it is better to create a structure*/
-    uint8  Ssid[MAX_LEN_OF_SSID+1] = "belkin";
-    uint8  Passphase[CIPHER_TEXT_LEN] ="12345678" ;
-    uint8  PMK[CIPHER_TEXT_LEN];            //= "PMK1234";
-
-    /* Must initialize Passphase and PMK  if no reference value be set on the above*/
-    //memset(Passphase, 0 ,CIPHER_TEXT_LEN);
-    memset(PMK, 0 ,CIPHER_TEXT_LEN);
-
-    /*Step2:  create a sub stateMachine for smnt */
-    /* Notice: the real Rx packet parser should not here, but deal with STAHandleRxDataFrame() */
-    {
-        /* Smnt connection state machine start */
-        /* Smnt connection done */
-    }
-
-    /*Step3:  After smart connection done */
-    /* it need set smart connection information , then start to scan*/
-    /*The Authmode shall be detected in scan state again, if AuthMode>WPA, PMK will be calculated in scan state*/
-    pIoTStaCfg->AuthMode       = Ndis802_11AuthModeOpen;
-    pIoTStaCfg->SsidLen          = strlen(Ssid);
-    pIoTStaCfg->PassphaseLen = strlen(Passphase); //sizeof(Passphase);
-    memcpy(pIoTStaCfg->Ssid,       Ssid,      pIoTStaCfg->SsidLen);
-    memcpy(pIoTStaCfg->Passphase, Passphase, pIoTStaCfg->PassphaseLen);
-    memcpy(pIoTStaCfg->PMK,  PMK, strlen(PMK));
-
-    wifi_state_chg(WIFI_STATE_SCAN, 0);  /* Change wifi state to SCAN*/
 }
-#endif  /*(CFG_SUPPORT_MTK_SMNT == 0)*/
 #endif  /*CONFIG_STATION*/
 
 
@@ -472,13 +428,8 @@ void iot_cust_ops(void)
     /*The callback for each of Wifi State Machine*/
 #ifdef CONFIG_STATION
     IoTCustOp.IoTCustWifiSMInit      = NULL;                                  /*Callback function while for STA wifi stateMachine initialize;*/
-#if (CFG_SUPPORT_MTK_SMNT == 1)
-    IoTCustOp.IoTCustWifiSMSmnt      = SMTCN_process;             /*MTK SmartConnection sub statemachine*/
-    IoTCustOp.IoTCustSMNTStaChgInit= SMTCN_state_chg_init;  /*MTK SmartConnection sub statemachine initial function*/
-#else
     IoTCustOp.IoTCustWifiSMSmnt      = IoT_Cust_SM_Smnt;                   /*Customer's SmartConnection sub statemachine*/
     IoTCustOp.IoTCustSMNTStaChgInit= IoT_Cust_SMNT_Sta_Chg_Init;  /*Customer's SmartConnection sub statemachine initial function*/
-#endif
     IoTCustOp.IoTCustScanDone         = iot_cust_scan_done;     /*Callback function while Scan done;*/
     IoTCustOp.IoTCustWifiSMConnect  = NULL;                               /*Callback function while STA got IP address done;*/
 #endif

@@ -239,11 +239,20 @@ void handle_tcp_srv_app2(void)
 #if TCP_SRV_APP3_ENABLE
 void handle_tcp_srv_app3(void)
 {
-    static uint8  set=0, event=0;
-    char *cptr;
-    uint32 gpio_set, gpio_event;
+	static uint8  set=0, event=0;
+	static char sta = 0xff;
+	char *cptr;
+	uint32 gpio_set, gpio_event;
 
     if (uip_newdata()) {
+	if(memcmp(uip_appdata, "STA0", 4) == 0) {
+		 iot_gpio_output(2,  0);
+		 sta = 0;
+	}
+	if(memcmp(uip_appdata, "STA1", 4) == 0) {
+		iot_gpio_output(2,  1);
+		sta = 1;
+	}
     }
 
     if (uip_poll()) {
@@ -253,9 +262,14 @@ void handle_tcp_srv_app3(void)
 		if((gpio_set != set) || (gpio_event != event)) {
 			set = gpio_set;
 			event = gpio_event;
-			sprintf(uip_appdata, "S%cE%c\n", (set?1:0), (event?1:0));
-			uip_send(uip_appdata, (sizeof("S0E0\n")+1));
+			sprintf(uip_appdata, "S%cE%c\n", (set?'1':'0'), (event?'1':'0'));
+			uip_send(uip_appdata, (strlen("S0E0\n")+1));
 		}
+	        else if(sta != 0xff) {
+			sprintf(uip_appdata, "STA%c\n", (sta?'1':'0'),);
+			uip_send(uip_appdata, (strlen("STA0\n")+1));
+			sta = 0xff;
+	        }
     }
 }
 #endif
