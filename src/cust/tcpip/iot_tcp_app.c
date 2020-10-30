@@ -254,7 +254,7 @@ void handle_tcp_srv_app3(void)
 			set = gpio_set;
 			event = gpio_event;
 			sprintf(uip_appdata, "S%cE%c\n", (set?1:0), (event?1:0));
-			uip_send(uip_appdata, i);
+			uip_send(uip_appdata, (sizeof("S0E0\n")+1));
 		}
     }
 }
