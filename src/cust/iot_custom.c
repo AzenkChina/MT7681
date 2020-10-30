@@ -51,11 +51,9 @@ extern AP_ADMIN_CONFIG  *pIoTApCfg;
 #else
 extern STA_ADMIN_CONFIG *pIoTStaCfg;
 #endif
-#if (UART_INTERRUPT == 1)
 /* We can use UART TX POLL scheme(such as debug/test),default is FALSE*/
 bool UART_TX_POLL_ENABLE = FALSE;
 extern void uart_rx_dispatch(void);
-#endif
 #if (IOT_SMP_RSSI_COLLECT == 1)
 extern RX_RSSI_INFO gRxRSSIInfo;
 #endif
@@ -288,11 +286,7 @@ void cust_subtask(void)
 {
     /* The Task to Handle the AT Command */
 #if (ATCMD_SUPPORT == 1)
-#if (UART_INTERRUPT == 1)
     uart_rx_dispatch();
-#else
-    iot_atcmd_hdlr();
-#endif
 #endif
 
     /*  The Task to collect all rx packet and calculate the average signal strength*/
@@ -345,11 +339,6 @@ void cust_app_init(void)
     cnmTimerInitTimer(&IoTCustTimer.custTimer0,  iot_cust_timer0_timeout_actioin, 0, 0);
 
     cnmTimerStartTimer (&IoTCustTimer.custTimer0, 100);
-
-
-#if (MT7681_POWER_SAVING == 1)
-    pIoTMlme->PMLevel = IOT_STA_PWR_SAV_LVL_DEF;
-#endif
     
     /* run customer initial function */
     if (IoTCustOp.IoTCustInit != NULL) {

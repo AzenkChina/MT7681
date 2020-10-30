@@ -112,7 +112,6 @@
 #define        AT_CMD_MAC_SET           "MAC "
 #define        AT_CMD_BBP_SET            "BBP "
 #define        AT_CMD_RF_SET              "RF "
-#define        AT_CMD_PS_SET              "PowerSaving "
 
 
 /*Default output value for GPIO0~4*/
@@ -124,18 +123,6 @@
 /*Sample for Rx packet Signal strength calculate */
 #define IOT_SMP_RSSI_COLLECT                (0)          /*(0)-disable,   (1)-enable*/
 #define IOT_SMP_RSSI_COLLECT_PERIOD  (1000)     /*uint:ms*/
-
-#if (MT7681_POWER_SAVING == 1)
-/*Enable/Disable PowerSaving Feature when 7681 STA connected AP-router */
-#define IOT_STA_PWR_SAV_ENABLE          (FALSE)  /*(FALSE)-disable,   (TRUE)-enable*/
-
-/*The default power saving level for MT7681 STA mode,  (Range:1~5)*/
-/* if MT7681(Station mode) in Power saving level1~2 , MT7681will handle the uart or GPIO interrupt,  
-  * and the all uart rx data from peer device will be received
-  * if MT7681(Station mode) in Power saving level3~5 ,MT7681 will not handle the uart or GPIO interrupt,  
-  * and the the uart rx data from peer device will be missed */
-#define IOT_STA_PWR_SAV_LVL_DEF         (1)
-#endif
 
 typedef enum t_UartRxMode {
     UARTRX_ATCMD_MODE = 1,
@@ -199,9 +186,6 @@ void iot_atcmd_resp_header(int8 *pHeader, size_t* plen, int8* ATcmdPrefix, int8*
 
 #if (ATCMD_UART_SUPPORT == 1) && (UART_SUPPORT == 1)
 int16 iot_exec_atcmd_uart(puchar pCmdBuf, int16 AtCmdLen) XIP_ATTRIBUTE(".xipsec0");
-#endif
-#if ((ATCMD_PS_SUPPORT == 1) && (MT7681_POWER_SAVING == 1))
-int16 iot_exec_atcmd_ps_set(puchar pCmdBuf, int16 AtCmdLen) XIP_ATTRIBUTE(".xipsec0");
 #endif
 #if (ATCMD_FLASH_SUPPORT == 1)
 int16 iot_atcmd_exec_flash(puchar pCmdBuf, int16 AtCmdLen) XIP_ATTRIBUTE(".xipsec0");

@@ -105,19 +105,6 @@ PrimaryCH   2ndCH  CenterCH        PrimaryCH   2ndCH       CenterCH
 #define EXTCHA_BELOW        0x3      /*40 MHz Below*/
 
 
-/*
- *  use in STA power saving mode
- *  when does we enter sleep? below conditions are neccesary
- *  OK,you can also change their value
- */
-#if (MT7681_POWER_SAVING == 1)
-#define PS_FCE_TXIDLE_PERIOD               (2)            /* COUNT */
-#define PS_RXWAIT_TIME                          (10)           /* unit: msec */
-#define PS_UART_TRXIDLE_TIME               (1*1000)       /* unit: msec */
-#define PS_NULL_ACK_WAIT_TIME            (500)          // unit: usec,watch interval from log
-#define PS_NULL_ACK_WAIT_MAX             (3)           /* COUNT */
-#endif
-
 #define BEACON_LOST_TIME                      (20*1000)    /* unit: msec */
 #define AUTH_TIMEOUT                              (300)        /* unit: msec */
 #define NULL_FRAME_TIMEOUT                  (10*1000)    /* unit: msec */
@@ -211,8 +198,6 @@ typedef enum {
     PKT_IWCMD
 } PKT_TYPE;
 
-
-#if (UART_INTERRUPT == 1)
 //buffer length for uart rx buffer whose data is moved from uart UART HW RX FIFO
 #define    UARTRX_RING_LEN    512
 
@@ -255,8 +240,6 @@ typedef struct {
     UART_TX_FUNC                tx_cb;
     UART_RX_FUNC                rx_cb;
 } UARTStruct;
-
-#endif
 
 
 /******************************************************************************
@@ -830,17 +813,10 @@ void    uart_rb_init(void);
 void    UART_PutChar(uint8 ch);
 int32   UART_GetChar(uint8* ch);
 void    uart_rb_push(uint8 ch);
-
-#if (UART_INTERRUPT == 1)
 void   uart_tx_cb(void);
 void   uart_rx_cb(void);
 void   uart_rx_dispatch(void);
 void   uart_rxbuf_init(UARTStruct *qp);
-#endif
-
-#if (UART_INTERRUPT == 0)
-int16   IoT_uart_input(uint8 *msg, int16 count);
-#endif
 int16   iot_uart_output(uint8 *msg, int16 count);
 
 #if (ATCMD_UART_FW_SUPPORT == 1)

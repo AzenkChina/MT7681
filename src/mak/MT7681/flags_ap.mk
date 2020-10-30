@@ -203,8 +203,6 @@ DBGFLAGS	+=	-DDBG_MICTOR=0
 # BSP SETTING
 FUNCFLAGS	=	-D__MT7681
 FUNCFLAGS	+=	-DUART_SUPPORT=1
-FUNCFLAGS	+=	-DUART_INTERRUPT=1          #0,UART polling ;1,UART interrupt,we prefer to use UART interrupt 
-FUNCFLAGS	+=	-DMT7681_POWER_SAVING=0     #STA power saving mode as Specification said,AP should have no power saving mode
 
 # WIFI FUNCTIONS 
 FUNCFLAGS	+=	-DWIFI_SUPPORT=1

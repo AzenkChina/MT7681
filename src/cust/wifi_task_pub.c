@@ -191,11 +191,6 @@ wifiTASK_LowPrioTask (void)
 
     if (iot_get_fceint_state() == 0)
         sysTASK_AssertSignal(SYS_SIG_WIFI_IDLE_REQ);
-
-    /* No anything,go to sleep*/
-#if (MT7681_POWER_SAVING == 1)
-    iot_sta_pwr_sav(pIoTMlme->PMLevel);
-#endif
 }
 
 /*========================================================================
@@ -503,15 +498,3 @@ void store_sta_cfg(void)
 
 #endif //#ifdef CONFIG_STATION
 
-/*========================================================================
-   Interface which is MAYBE implemented by custom if custom need some extra power saving check
-
-   TRUE:  extra power saving check result:Allow enter sleep
-   FLASE: extra power saving check result:NoT allow enter sleep
-========================================================================*/
-#if (MT7681_POWER_SAVING == 1)
-bool iot_cust_ps_onoff(void)
-{
-    return IOT_STA_PWR_SAV_ENABLE;
-}
-#endif

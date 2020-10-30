@@ -6,19 +6,15 @@
 #include "uip_timer.h"
 #include "iot_custom.h"
 #if (UART_SUPPORT == 1)
-#if (UART_INTERRUPT == 1)
 #include "bmd.h"
 #include "uart_sw.h"
-#endif
 #endif
 
 extern IOT_ADAPTER       IoTpAd;
 extern u8_t gCurrentAddress[];
 extern u16_t http_clientPort;
 #if (UART_SUPPORT == 1)
-#if (UART_INTERRUPT == 1)
 extern UARTStruct UARTPort;
-#endif
 #endif
 /*---------------------------------------------------------------------------*/
 /*
@@ -198,28 +194,23 @@ void handle_tcp_srv_app1(void)
 void handle_tcp_srv_app2(void)
 {
 #if (UART_SUPPORT ==1)
-#if (UART_INTERRUPT == 1)
     int16  i = 0;
     int16 rx_len = 0;
     BUFFER_INFO *rx_ring = &(UARTPort.Rx_Buffer);
     char *cptr;
 #endif
-#endif
 
     if (uip_newdata()) {
 #if (UART_SUPPORT ==1)
-#if (UART_INTERRUPT == 1)
             if(uip_datalen() > 0) {
             	iot_uart_output(uip_appdata, (int16)uip_datalen());
             }
-#endif
 #endif
     }
 
     if (uip_poll()) {
         /* below codes shows how to send data to client  */
 #if (UART_SUPPORT ==1)
-#if (UART_INTERRUPT == 1)
             cptr = (char *)uip_appdata;
             Buf_GetBytesAvail(rx_ring, rx_len);
             if(rx_len <= 0) {
@@ -232,7 +223,6 @@ void handle_tcp_srv_app2(void)
                 Buf_Pop(rx_ring, cptr[i]);
             }
             uip_send(uip_appdata, i);
-#endif
 #endif
     }
 }

@@ -307,9 +307,6 @@ void STAHandleRxDataFrame(
              * here,we check the received UC/BMC packet which parepared for power saving
              */
             if (pIoTMlme->CurrentWifiState == WIFI_STATE_CONNED)  {
-#if (MT7681_POWER_SAVING == 1)
-                STACheckRxDataForPS(pRxBlk);
-#endif
 #if CFG_SUPPORT_TCPIP
                 pRxBlk->pData    -= 6;
                 memcpy(pRxBlk->pData, pRxBlk->pHeader->Addr3, 6);
@@ -385,14 +382,6 @@ void STAHandleRxMgmtFrame(
                     } else {
                         iot_bcn_timeout_action(0,0);
                     }
-
-                    /*
-                    * 2014/05/23,terrence,MT7681 STA power saving mode
-                    * here,we check the received beacon packet which parepared for power saving
-                    */
-#if (MT7681_POWER_SAVING == 1)
-                    STACheckRxBeaconForPS(pRxBlk);
-#endif
                 }
             }
             break;
@@ -562,9 +551,6 @@ bool WifiRxFsIntFilterOut(pBD_t RxpBufDesc)
     PRXINFO_STRUC   pRxINFO;
     PRXWI_STRUC     pRxWI;
     PHEADER_802_11  pHeader;
-#if (MT7681_POWER_SAVING == 1)
-    RX_BLK            RxBlk;
-#endif
     uint8           type;
     uint8           subtype;
 
@@ -592,22 +578,6 @@ bool WifiRxFsIntFilterOut(pBD_t RxpBufDesc)
             /*The Mcast, Bcast bits shall be set as 1, if Received Packet is Broadcast  */
             /*The Mcast shall be set as 1, Bcast bit shall be set as 0, if Received Packet is Multicast  */
             if ((pRxINFO->Mcast) && (pRxINFO->Bcast == 0)) {
-                /*
-                 * 2014/05/23,terrence,MT7681 STA power saving mode
-                 * here,we check the received UC/BMC packet which parepared for power saving
-                 */
-#if (MT7681_POWER_SAVING == 1)
-                /* fill RxBLK */
-                RxBlk.pRxINFO = pRxINFO;
-                RxBlk.pRxWI   = pRxWI;
-                RxBlk.pHeader = pHeader;
-                RxBlk.pRxPacket = RxpBufDesc;
-                RxBlk.pData = (uint8 *) pHeader;
-                //RxBlk.DataSize = pRxWI->MPDUtotalByteCount;
-                //RxBlk.Flags = 0;
-
-                STACheckRxDataForPS(&RxBlk);
-#endif
                 /*Improve Rx Performance by drop Multicast frame while MT7681 connected with AP router */
                 return TRUE;
             }
@@ -1008,13 +978,6 @@ int sta_legacy_frame_tx(
     /* Fill TXD content */
     WriteSingleTxResource(&TxBlk);
 
-    /*2014/05/23,terrence
-     * save the lastest tx time in Connected state,we use the tx idle duation to
-     * deciede whether tx path ready to sleep */
-#if (MT7681_POWER_SAVING == 1)
-    pIoTStaCfg->PwrCfg.FCELastTxTime = kal_get_systime();
-#endif
-
     return 0;
 }
 
@@ -1211,14 +1174,6 @@ NDIS_STATUS MiniportMMRequest(
     PHEADER_802_11  pHdr80211  = NULL;
     pOutBuffer = pBufDesc->pBuf;
     pHdr80211 = (PHEADER_802_11)pOutBuffer;
-
-    /*2014/05/23,terrence
-     * save the lastest tx time in Connected state,we use the tx idle duation to
-     * deciede whether tx path ready to sleep */
-#if (MT7681_POWER_SAVING == 1)
-    if ((pHdr80211->FC.Type != BTYPE_DATA) && (pHdr80211->FC.SubType != SUBTYPE_NULL_FUNC))
-        pIoTStaCfg->PwrCfg.FCELastTxTime = kal_get_systime();
-#endif
 
     memset(&TxBlk, 0, sizeof(TX_BLK));
 

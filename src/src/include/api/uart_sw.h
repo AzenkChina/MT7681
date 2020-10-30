@@ -143,14 +143,12 @@ void UART_SetBaudRate(UART_baudrate baudrate) XIP_ATTRIBUTE(".xipsec0");
 void UART_SetDCBConfig(UARTDCBStruct *UART_Config) XIP_ATTRIBUTE(".xipsec0");
 void UART_PutUARTByte(volatile uint8 data);
 
-#if (UART_INTERRUPT == 1)
 void UART_Register_TX_cb(UART_TX_FUNC func) XIP_ATTRIBUTE(".xipsec0");
 void UART_Register_RX_cb(UART_RX_FUNC func) XIP_ATTRIBUTE(".xipsec0");
 void UART_LISR(void);
 kal_bool UART_Open(void) XIP_ATTRIBUTE(".xipsec0");
 uint16 _UART_GetByte(volatile uint8 *Byte);
 uint16 uart_put_bytes(volatile uint8 *Buffaddr, volatile uint16 Length);
-#endif
 
 #endif   /*UART_SW_H*/
 

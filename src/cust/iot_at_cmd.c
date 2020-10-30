@@ -51,11 +51,6 @@
  ******************************************************************************/
 int8  state   = 0;
 
-#if (UART_INTERRUPT != 1)
-uint8 command[AT_CMD_MAX_LEN];
-int16 cmd_len = 0;
-#endif
-
 #if (ATCMD_ATE_SUPPORT == 1)
 bool gCaliEnabled = FALSE;
 extern ATE_INFO gATEInfo;
@@ -73,10 +68,8 @@ extern  MLME_STRUCT *pIoTMlme;
 extern EEPROM_CFG eepcfg;
 #endif
 
-#if (UART_INTERRUPT == 1)
 extern PKT_DESC       uartrx2_desc;    //descrypt packet length in uart rx ring2
 extern BUFFER_INFO   uartrx2_info;     //uart rx ring2
-#endif
 
 /******************************************************************************
  * EXTERN FUNCTION
@@ -600,58 +593,6 @@ int16 iot_exec_atcmd_efuse_set(puchar pCmdBuf, int16 AtCmdLen)
 }
 #endif
 
-#if ((ATCMD_PS_SUPPORT == 1) && (MT7681_POWER_SAVING == 1))
-/* Format:    AT#PowerSaving -l0 -t16777215+enter*/
-/* -l :  range 1~5 */
-/* -t :  range 0~0xFFFFFF   sleepTime = us*/
-/* Format:    AT#PowerSaving -r+enter*/
-int16 iot_exec_atcmd_ps_set(puchar pCmdBuf, int16 AtCmdLen)
-{
-    char *argv[MAX_OPTION_COUNT];
-    char *opString = "r::l:t:?";
-    char *endptr = NULL;
-    int16 argc = 0;
-    char opt = 0;
-
-    uint8  Level = 0;
-    uint32 SleepTime = 0;
-
-    split_string_cmd(pCmdBuf, AtCmdLen, &argc, argv);
-    opt = getopt(argc, argv, opString);
-
-    while (opt != -1) {
-        switch (opt) {
-            case 'l':
-                /*write power saving level*/
-                Level = (uint8)simple_strtol(optarg,&endptr,0);
-                if ((Level>0) && (Level<=5)) {
-                    printf_high("[PS Lvl]=%d\n",Level);
-                    pIoTMlme->PMLevel = Level;
-                }
-                break;
-            case 't':
-                /*power sleep time*/
-                SleepTime = (uint32)simple_strtol(optarg,&endptr,0);
-                if ((Level>0) && (Level<=5)) {
-                    printf_high("[PS] Lvl=%d Sleep=%u(us)\n",Level,SleepTime);
-                    LowPower(0,Level,SleepTime);
-                }
-                break;
-            case 'r':
-                /*read power saving level*/
-                printf_high("[PS Lvl]=%d\n",pIoTMlme->PMLevel);
-                break;
-            case '?':
-            default:
-                break;
-        }
-        opt = getopt(argc, argv, opString);
-    }
-
-    return 0;
-}
-#endif
-
 #if (ATCMD_CH_SWITCH_SUPPORT == 1)
 /*========================================================================
     Routine    Description:
@@ -950,12 +891,6 @@ int16 iot_atcmd_parser(puchar cmd_buf, int16 AtCmdLen)
         ret_code = iot_exec_atcmd_uart(cmd_buf, AtCmdLen);
     }
 #endif
-#if ((ATCMD_PS_SUPPORT == 1) && (MT7681_POWER_SAVING == 1))
-    /* Format:    AT#PowerSaving -l0 -t2000+enter*/ /* sleepTime = us */
-    else if (!memcmp(cmd_buf,AT_CMD_PS_SET,sizeof(AT_CMD_PS_SET)-1)) {
-        ret_code = iot_exec_atcmd_ps_set(cmd_buf, AtCmdLen);
-    }
-#endif
 
     /*Only for Debug*/
 #if (ATCMD_ATE_MBR_CTL == 1)
@@ -993,99 +928,3 @@ int16 iot_iwcmd_parser(puchar cmd_buf, int16 AtCmdLen)
     return ret_code;
 }
 
-
-#if (UART_INTERRUPT != 1)
-int16 iot_atcmd_detect(uint8* pType)
-{
-    uint8 ch = 0;
-    int32 read = -1;
-    int16 ret_len = 0;
-
-    static uint8  CmdType = PKT_UNKNOWN;
-    static uint8  ATMatchNum = 0;
-    static uint8  IWMatchNum = 0;
-    char ATCmdPrefixAT[]=AT_CMD_PREFIX;
-    char ATCmdPrefixIW[]=AT_CMD_PREFIX2;
-
-    if (UART_LSROverErr() != 0)
-        return -1;
-
-    /*Notice: Must not use printf_high in the while block,  the Rx FIFO,RxINT and ringbuf will mess*/
-    while (1) {
-        read = UART_GetChar((uint8*)&ch);
-
-        if (read == -1)
-            return -1;
-
-        if (CmdType == PKT_UNKNOWN) {
-            /*case 1:AT#*/
-            if (ATCmdPrefixAT[ATMatchNum] == ch)
-                ATMatchNum++;
-            else
-                ATMatchNum = 0;
-
-            /*case 2:iwpriv ra0*/
-            if (ATCmdPrefixIW[IWMatchNum] == ch)
-                IWMatchNum++;
-            else
-                IWMatchNum = 0;
-
-            if (( ATMatchNum == sizeof(ATCmdPrefixAT)-1 ) ||   //match case 1: AT#
-                ( IWMatchNum == sizeof(ATCmdPrefixIW)-1 ) ) {  //match case 2:iwpriv ra0
-                if ( ATMatchNum == sizeof(ATCmdPrefixAT)-1 )
-                    CmdType = PKT_ATCMD;             //match case 1: AT#
-                else if ( IWMatchNum == sizeof(ATCmdPrefixIW)-1 )
-                    CmdType = PKT_IWCMD;             //match case 2:iwpriv ra0
-
-                ATMatchNum = 0;
-                IWMatchNum = 0;
-                continue;
-            }
-        } else if ((PKT_ATCMD == CmdType) || (PKT_IWCMD == CmdType)) {
-            if (ch == '\n' || ch == '\r') {
-                *pType = CmdType;
-                CmdType = PKT_UNKNOWN;
-                ret_len = cmd_len;   /*not include '\n'*/
-                cmd_len = 0;
-                return ret_len;
-            } else {
-                command[cmd_len] = ch;
-                cmd_len++;
-                if (cmd_len >= AT_CMD_MAX_LEN) {
-                    CmdType = PKT_UNKNOWN;
-                    cmd_len = 0;
-                    return -2;
-                }
-            }
-        }
-    }
-    return 0;
-
-}
-
-void iot_atcmd_hdlr(void)
-{
-    int16 AtCmdLen = 0;
-    int16 ret_code = 0;
-    uint8 Type = PKT_UNKNOWN;
-
-    AtCmdLen = iot_atcmd_detect(&Type);
-
-    if (AtCmdLen > 0) {
-        printf_high("AtCmdLen=%d, Type=%d \n",AtCmdLen,Type);
-
-        if (Type == PKT_ATCMD)         //match case 1: AT#
-            ret_code = iot_atcmd_parser(command, AtCmdLen);
-        else if (Type == PKT_IWCMD)    //match case 2:iwpriv ra0
-            ret_code = iot_iwcmd_parser(command, AtCmdLen);
-        else
-            return;
-
-        if (ret_code != 0) {
-            //printf_high("exec error: %d\n",ret_code);
-        }
-    } else if (AtCmdLen == -2) {
-        //printf_high("=>%s AT command is too long\n",__FUNCTION__);
-    }
-}
-#endif

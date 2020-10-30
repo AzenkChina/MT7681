@@ -33,7 +33,6 @@
 extern IOT_ADAPTER  IoTpAd;
 extern char *optarg;
 
-#if (UART_INTERRUPT == 1)
 /*2014/05/13,terrence,define uart tx/rx ring buff */
 uint8     UARTRxBuf[UARTRX_RING_LEN];    //used in UARTPort.Rx_Buffer
 uint8     UARTTxBuf[UARTTX_RING_LEN];    //used in UARTPort.Tx_Buffer
@@ -57,7 +56,6 @@ void uart_rxbuf_init(UARTStruct *qp)
 }
 
 
-#if (UART_INTERRUPT == 1)
 /*
  * Write data to UART
  * API can be used in either UART Interrupt mode or Polling mode
@@ -73,7 +71,6 @@ int16 iot_uart_output (uint8 *msg, int16 count)
     }
     return uart_put_bytes(msg,(uint16)count);
 }
-#endif
 
 /*
  *  task context
@@ -333,15 +330,11 @@ void uart_rx_dispatch(void)
     }
 }
 
-#endif
-
 void iot_uart_init(void)
 {
-#if (UART_INTERRUPT == 1)
     /*configure ringbuffer*/
     Buf_init(&(UARTPort.Tx_Buffer),(uint8 *)(UARTTxBuf),(uint16)UARTTX_RING_LEN);
     uart_rxbuf_init((UARTStruct*)(&UARTPort));
-#endif
 }
 
 /*This function shall be called in BSP_init()*/
