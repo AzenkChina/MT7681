@@ -242,7 +242,7 @@ void handle_tcp_srv_app2(void)
 void handle_tcp_srv_app3(void)
 {
 	static uint8  set=0, event=0;
-	static char sta = 0xff;
+	static uint8 sta = 0xff;
 	char *cptr;
 	uint32 gpio_set, gpio_event;
 
