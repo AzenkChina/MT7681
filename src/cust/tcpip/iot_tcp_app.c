@@ -172,11 +172,14 @@ void handle_tcp_cli_app1(void)
 #if TCP_SRV_APP1_ENABLE
 void handle_tcp_srv_app1(void)
 {
-    static char result = 0xff;
+    static uint8 result = 0xff;
+    char *cptr;
 
     if (uip_newdata()) {
 	if((uip_datalen() > 8) && (uip_datalen() < AT_CMD_MAX_LEN)) {
-		result = iot_atcmd_parser(uip_appdata, uip_datalen());
+		cptr = (char *)uip_appdata;
+		if((cptr[0] == 'A') && (cptr[1] == 'T') && (cptr[2] == '#'))
+			result = iot_atcmd_parser(&cptr[3], (uip_datalen()-3));
 	}
     }
 
