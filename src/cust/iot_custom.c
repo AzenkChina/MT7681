@@ -9,7 +9,6 @@
 #ifdef CONFIG_SOFTAP
 #include "ap_pub.h"
 #endif
-#include "uart_sw.h"
 
 /******************************************************************************
 * MODULE NAME:     iot_customer.c
@@ -205,23 +204,6 @@ void iot_cust_preinit(void)
 void iot_cust_init(void)
 {
     /* run customer initial function */
-    UARTDCBStruct  UART_UserConfig = {
-		UART_BAUD_115200,    /* baud; */
-		len_8,               /* dataBits; */
-		sb_1,                /*stopBits; */
-		pa_none,             /* parity; */
-		fc_none,             /*no flow control*/
-		0x11,                /* xonChar; */
-		0x13,                /* xoffChar; */
-		KAL_FALSE
-		};
-
-    UART_UserConfig.baud= IoTpAd.ComCfg.UART_Baudrate;
-    UART_UserConfig.dataBits = IoTpAd.ComCfg.UART_DataBits;
-    UART_UserConfig.parity = IoTpAd.ComCfg.UART_Parity;
-    UART_UserConfig.stopBits = IoTpAd.ComCfg.UART_StopBits;
-    UART_SetDCBConfig(&UART_UserConfig);
-    mt7681_uart_pin_set();
 }
 
 

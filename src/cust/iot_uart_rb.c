@@ -356,18 +356,14 @@ int32 iot_atcmd_uart_atcfg(puchar pCmdBuf, int16 AtCmdLen)
     char *opString = "b:w:p:s:?";
     char opt;
     long num;
-    UARTDCBStruct  UART_UserConfig = {
-        UART_BAUD_115200,    /* baud; */
-        len_8,               /* dataBits; */
-        sb_1,                /*stopBits; */
-        pa_none,             /* parity; */
-        fc_none,             /*no flow control*/
-        0x11,                /* xonChar; */
-        0x13,                /* xoffChar; */
-        KAL_FALSE
-    };
+    UARTDCBStruct  UART_UserConfig;
     UARTDCBStruct *DCBUser;
     char *endptr;
+
+    UART_UserConfig.baud = UART_BAUD_115200;
+    UART_UserConfig.dataBits = len_8;
+    UART_UserConfig.parity = sb_1;
+    UART_UserConfig.stopBits = pa_none;
 
     /*Select GPIO or Uartlite, Switch to UART */
     mt7681_uart_pin_set();
