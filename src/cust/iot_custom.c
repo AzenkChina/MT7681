@@ -204,6 +204,23 @@ void iot_cust_preinit(void)
 void iot_cust_init(void)
 {
     /* run customer initial function */
+    UARTDCBStruct  UART_UserConfig = {
+		UART_BAUD_115200,    /* baud; */
+		len_8,               /* dataBits; */
+		sb_1,                /*stopBits; */
+		pa_none,             /* parity; */
+		fc_none,             /*no flow control*/
+		0x11,                /* xonChar; */
+		0x13,                /* xoffChar; */
+		KAL_FALSE
+		};
+
+    DCBUser->baud= IoTpAd.ComCfg.UART_Baudrate;
+    DCBUser->dataBits = IoTpAd.ComCfg.UART_DataBits;
+    DCBUser->parity = IoTpAd.ComCfg.UART_Parity;
+    DCBUser->stopBits = IoTpAd.ComCfg.UART_StopBits;
+    UART_SetDCBConfig(&UART_UserConfig);
+    mt7681_uart_pin_set();
 }
 
 
@@ -806,6 +823,7 @@ void iot_switch_to_sta()
 
 	spi_flash_erase_sector(FLASH_COM_CFG_BASE);
 	spi_flash_write(FLASH_COM_CFG_BASE, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
+	iot_sys_reboot();
 }
 
 void iot_switch_to_ap()
@@ -840,6 +858,7 @@ void iot_switch_to_ap()
 
 	spi_flash_erase_sector(FLASH_COM_CFG_BASE);
 	spi_flash_write(FLASH_COM_CFG_BASE, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
+	iot_sys_reboot();
 }
 #endif
 
