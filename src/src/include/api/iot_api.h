@@ -329,9 +329,9 @@ typedef struct GNU_PACKED _IOT_COMMON_CFG_ {
 
 
 typedef struct GNU_PACKED _IOT_USER_CFG_ {
-    uint8 VendorName[FLASH_USR_CFG_VENDOR_NAME_LEN];
-    uint8 ProductType[FLASH_USR_CFG_PRODUCT_TYPE_LEN];
-    uint8 ProductName[FLASH_USR_CFG_PRODUCT_NAME_LEN];
+    uint8 VendorName[32];
+    uint8 ProductType[32];
+    uint8 ProductName[32];
 } IOT_USR_CFG;
 
 
@@ -447,11 +447,11 @@ typedef struct GNU_PACKED t_PWM_Information {
 
 typedef struct GNU_PACKED t_ClientCapability {
     uint16 VendorNameLen;
-    uint8 VendorName[FLASH_USR_CFG_VENDOR_NAME_LEN];
+    uint8 VendorName[32];
     uint16 ProductTypeLen;
-    uint8 ProductType[FLASH_USR_CFG_PRODUCT_TYPE_LEN];
+    uint8 ProductType[32];
     uint16 ProductNameLen;
-    uint8 ProductName[FLASH_USR_CFG_PRODUCT_NAME_LEN];
+    uint8 ProductName[32];
 } ClientCapability;
 
 

@@ -52,9 +52,6 @@ AP_ADMIN_CONFIG  *pIoTApCfg;
 STA_ADMIN_CONFIG *pIoTStaCfg;
 #endif
 
-/*to indicated wheter store the SMNT setting after Wifi Connected AP and Got IP*/
-bool gSmnted = FALSE;
-
 /*gCurrentAddress shall be set in sys_init() as the value stored in flash sta cfg region if the value in flash is valid*/
 uint8 gCurrentAddress[MAC_ADDR_LEN]    =    {0x00, 0x0c, 0x43, 0x12, 0x34, 0xf3};
 uint8 BCAST_ADDR[MAC_ADDR_LEN]      =     {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
@@ -349,12 +346,6 @@ void ws_init(OUT bool *pb_enable)
 ========================================================================*/
 void ws_smt_conn(OUT bool *pb_enable)
 {
-    *pb_enable = TRUE;
-
-    if (IoTCustOp.IoTCustWifiSMSmnt != NULL) {
-        /*implement smart connection*/
-        IoTCustOp.IoTCustWifiSMSmnt();
-    }
 }
 
 /*========================================================================
@@ -368,13 +359,6 @@ void ws_smt_conn(OUT bool *pb_enable)
 ========================================================================*/
 void ws_goto_smnt(void)
 {
-    wifi_state_chg(WIFI_STATE_SMTCNT, 0);
-
-    if (IoTCustOp.IoTCustSMNTStaChgInit != NULL) {
-        IoTCustOp.IoTCustSMNTStaChgInit();
-    }
-
-    gSmnted = TRUE;
 }
 
 /*========================================================================

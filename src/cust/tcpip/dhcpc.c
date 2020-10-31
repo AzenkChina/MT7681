@@ -37,9 +37,6 @@
 #include "iot_api.h"
 
 /*---------------------------------------------------------------------------*/
-/*to indicated wheter store the SMNT setting after Wifi Connected AP and Got IP*/
-/*it shalll be set to True after IoTCustOp.IoTCustSMNTStaChgInit()  */
-extern bool gSmnted;
 
 extern IOT_CUST_OP IoTCustOp;
 extern MLME_STRUCT *pIoTMlme;
@@ -462,14 +459,6 @@ u8_t dhcpc_get_state(void)
 void ws_got_ip(void)
 {
 #ifdef CONFIG_STATION
-    /*if connect with smart connection,  store the setting to flash*/
-#if (ENABLE_FLASH_SETTING == 1)
-    if (gSmnted) {
-        store_sta_cfg();
-        gSmnted = FALSE;
-    }
-#endif
-
     /*set to default value,  whether go to smnt or not, it should be judged by Flash STA cfg content*/
     pIoTMlme->ATSetSmnt = FALSE;
 

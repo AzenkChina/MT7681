@@ -319,14 +319,8 @@
 #define FLASH_USR_CFG_PRODUCT_INFO_STORED    (0x0)
 #define FLASH_USR_CFG_PRODUCT_INFO_STORED_LEN    (0x1)
 
-#define FLASH_USR_CFG_VENDOR_NAME        (0x1)
-#define FLASH_USR_CFG_VENDOR_NAME_LEN         (0x20)  //32 Byte
-
-#define FLASH_USR_CFG_PRODUCT_TYPE        (0x21)
-#define FLASH_USR_CFG_PRODUCT_TYPE_LEN         (0x20)  //32 Byte
-
-#define FLASH_USR_CFG_PRODUCT_NAME        (0x41)
-#define FLASH_USR_CFG_PRODUCT_NAME_LEN         (0x20)  //32 Byte
+#define FLASH_USR_CFG_AT_SUPPORT        (0x1)
+#define FLASH_USR_CFG_AT_SUPPORT_LEN         (0x1)
 
 #define FLASH_USR_CFG_RESERVE_1            (0x61)
 #define FLASH_USR_CFG_RESERVE_1_LEN         (0x0)

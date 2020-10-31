@@ -108,6 +108,8 @@ uint8 gCaliFrEfuse = 0x00;
 /*unit:ms  indicated recovery mode duration*/
 #if (ATCMD_RECOVERY_SUPPORT==1)
 uint16 gRecoveryModeTime = 4000;
+#else
+uint8 gCommandSupport = 0xff;
 #endif
 
 /*Indicated if use specified SSID to do scan  (TRUE/FALSE)  */
@@ -222,7 +224,13 @@ void cust_subtask(void)
 {
     /* The Task to Handle the AT Command */
 #if (ATCMD_SUPPORT == 1)
+#if (ATCMD_RECOVERY_SUPPORT==1)
     uart_rx_dispatch();
+#else
+    if(gCommandSupport) {
+        uart_rx_dispatch();
+    }
+#endif
 #endif
 
     /*  The Task to collect all rx packet and calculate the average signal strength*/
@@ -374,8 +382,6 @@ void iot_cust_ops(void)
 ========================================================================*/
 void iot_cust_timer0_timeout_actioin(uint32 param, uint32 param2)
 {
-    printf("iot_cust_timer0_timeout_actioin\n");
-
     cnmTimerStartTimer (&IoTCustTimer.custTimer0, 100);
 }
 
@@ -429,24 +435,19 @@ void reset_cfg(void)
 ========================================================================*/
 bool load_usr_cfg(void)
 {
-    //printf_high("%s \n",__FUNCTION__);
+     memcpy(&IoTpAd.UsrCfg , &Usr_Cfg , sizeof(IOT_USR_CFG));
 
-#if (ENABLE_FLASH_SETTING == 1)
+#if (ATCMD_RECOVERY_SUPPORT==0)
     /* read settings stored on flash USER CONFIG BLOCK */
-    //memset(IoTpAd.flash_rw_buf, 0, sizeof(IoTpAd.flash_rw_buf));
     spi_flash_read(FLASH_USR_CFG_BASE, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
 
     /*use stored flag to shrink code size*/
     if (IoTpAd.flash_rw_buf[FLASH_USR_CFG_PRODUCT_INFO_STORED] == PRODUCT_INFO_STORED)  {
-        /*if flash stored valid vendor name , product name and product type*/
-        memcpy(IoTpAd.UsrCfg.VendorName,    &IoTpAd.flash_rw_buf[FLASH_USR_CFG_VENDOR_NAME],    FLASH_USR_CFG_VENDOR_NAME_LEN);
-        memcpy(IoTpAd.UsrCfg.ProductType,    &IoTpAd.flash_rw_buf[FLASH_USR_CFG_PRODUCT_TYPE],    FLASH_USR_CFG_PRODUCT_TYPE_LEN);
-        memcpy(IoTpAd.UsrCfg.ProductName,   &IoTpAd.flash_rw_buf[FLASH_USR_CFG_PRODUCT_NAME],  FLASH_USR_CFG_PRODUCT_NAME_LEN);
+        gCommandSupport = IoTpAd.flash_rw_buf[FLASH_USR_CFG_AT_SUPPORT];
     } else {
+        gCommandSupport = 0xff;
         reset_usr_cfg(TRUE);
     }
-#else
-     memcpy(&IoTpAd.UsrCfg , &Usr_Cfg , sizeof(IOT_USR_CFG));
 #endif
 
     return TRUE;
@@ -462,20 +463,13 @@ bool load_usr_cfg(void)
 
 bool reset_usr_cfg(bool bUpFlash)
 {
-    //printf_high("%s \n",__FUNCTION__);
-    
     /* Notice: erase User config Flash region , default size is one sector [4KB] */
     spi_flash_erase_sector(FLASH_USR_CFG_BASE);
-    
+
     memset(IoTpAd.flash_rw_buf ,0xff, sizeof(IoTpAd.flash_rw_buf));
-    memcpy(&IoTpAd.UsrCfg , &Usr_Cfg , sizeof(IOT_USR_CFG));
 
     if (bUpFlash == TRUE) {
         IoTpAd.flash_rw_buf[FLASH_USR_CFG_PRODUCT_INFO_STORED] = PRODUCT_INFO_STORED;
-        memcpy(&IoTpAd.flash_rw_buf[FLASH_USR_CFG_VENDOR_NAME] ,  Usr_Cfg.VendorName, FLASH_USR_CFG_VENDOR_NAME_LEN);
-        memcpy(&IoTpAd.flash_rw_buf[FLASH_USR_CFG_PRODUCT_TYPE] , Usr_Cfg.ProductType, FLASH_USR_CFG_PRODUCT_TYPE_LEN);
-        memcpy(&IoTpAd.flash_rw_buf[FLASH_USR_CFG_PRODUCT_NAME] , Usr_Cfg.ProductName, FLASH_USR_CFG_PRODUCT_NAME_LEN);
-
         spi_flash_write(FLASH_USR_CFG_BASE, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
     }
 
@@ -491,8 +485,6 @@ bool reset_usr_cfg(bool bUpFlash)
 ========================================================================*/
 bool default_boot_cfg(void)
 {
-    //printf_high("%s \n",__FUNCTION__);
-
     IoTpAd.ComCfg.BootFWIdx           = DEFAULT_BOOT_FW_IDX;
     IoTpAd.ComCfg.RecovModeStatus = DEFAULT_RECOVERY_MODE_STATUS;
     IoTpAd.ComCfg.IOMode               = DEFAULT_IO_MODE;
@@ -502,8 +494,6 @@ bool default_boot_cfg(void)
 
 bool default_uart_cfg(void)
 {
-    //printf_high("%s \n",__FUNCTION__);
-
     IoTpAd.ComCfg.UART_Baudrate    = DEFAULT_UART_BAUDRATE;
     IoTpAd.ComCfg.UART_DataBits     = DEFAULT_UART_DATA_BITS;
     IoTpAd.ComCfg.UART_Parity         = DEFAULT_UART_PARITY;
@@ -514,8 +504,6 @@ bool default_uart_cfg(void)
 
 bool default_ip_cfg(void)
 {
-    //printf_high("%s \n",__FUNCTION__);
-
     IoTpAd.ComCfg.TCPUDP_CS                = DEFAULT_TCP_UDP_CS; //Com_Cfg.TCPUDP_CS;
     IoTpAd.ComCfg.IoT_TCP_Srv_Port       = DEFAULT_IOT_TCP_SRV_PORT;   //Com_Cfg.IoT_TCP_Srv_Port;
     IoTpAd.ComCfg.Local_TCP_Srv_Port     = DEFAULT_LOCAL_TCP_SRV_PORT;   //Com_Cfg.Local_TCP_Srv_Port;
@@ -542,60 +530,6 @@ bool default_ip_cfg(void)
 ========================================================================*/
 bool load_com_cfg(void)
 {
-    //printf_high("%s \n",__FUNCTION__);
-
-#if (ENABLE_FLASH_SETTING == 1)
-    /* read settings stored on flash Common CONFIG BLOCK */
-    //memset(IoTpAd.flash_rw_buf, 0, sizeof(IoTpAd.flash_rw_buf));
-    spi_flash_read(FLASH_COM_CFG_BASE, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
-
-    /*use stored flag to shrink code size*/
-    if (IoTpAd.flash_rw_buf[FLASH_COM_CFG_INFO_STORED] == COMMON_INFO_STORED) {
-        IoTpAd.ComCfg.BootFWIdx            =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_BOOT_IDX];
-        IoTpAd.ComCfg.RecovModeStatus     =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_RECOVERY_MODE_STATUS];
-        IoTpAd.ComCfg.IOMode            =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_IO_SET];
-
-        memcpy(&IoTpAd.ComCfg.UART_Baudrate, &IoTpAd.flash_rw_buf[FLASH_COM_CFG_UART_BAUD],   FLASH_COM_CFG_UART_BAUD_LEN);
-        IoTpAd.ComCfg.UART_DataBits    =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_UART_DATA_BITS];
-        IoTpAd.ComCfg.UART_Parity     =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_UART_PARITY];
-        IoTpAd.ComCfg.UART_StopBits    =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_UART_STOP_BITS];
-
-        if ((IoTpAd.ComCfg.UART_Baudrate > UART_BAUD_3200000) ||
-            (IoTpAd.ComCfg.UART_Parity > pa_space) ||
-            ((IoTpAd.ComCfg.UART_DataBits < len_5) || (IoTpAd.ComCfg.UART_DataBits > len_8))  ||
-            ((IoTpAd.ComCfg.UART_StopBits < sb_1)  || (IoTpAd.ComCfg.UART_StopBits > sb_1_5)) ) {
-            default_uart_cfg();
-        }
-
-        IoTpAd.ComCfg.TCPUDP_CS        =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_TCPUDP_CS_SET];
-        IoTpAd.ComCfg.Use_DHCP         =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_USE_DHCP];
-        memcpy(&IoTpAd.ComCfg.IoT_TCP_Srv_Port,    &IoTpAd.flash_rw_buf[FLASH_COM_CFG_IOT_TCP_SRV_PORT],FLASH_COM_CFG_IOT_TCP_SRV_PORT_LEN);
-        memcpy(&IoTpAd.ComCfg.Local_TCP_Srv_Port,    &IoTpAd.flash_rw_buf[FLASH_COM_CFG_LOCAL_TCP_SRV_PORT],FLASH_COM_CFG_LOCAL_TCP_SRV_PORT_LEN);
-        memcpy(&IoTpAd.ComCfg.IoT_UDP_Srv_Port, &IoTpAd.flash_rw_buf[FLASH_COM_CFG_IOT_UDP_SRV_PORT],FLASH_COM_CFG_IOT_UDP_SRV_PORT_LEN);
-        memcpy(&IoTpAd.ComCfg.Local_UDP_Srv_Port,    &IoTpAd.flash_rw_buf[FLASH_COM_CFG_LOCAL_UDP_SRV_PORT],FLASH_COM_CFG_LOCAL_UDP_SRV_PORT_LEN);
-        memcpy(IoTpAd.ComCfg.STATIC_IP,        &IoTpAd.flash_rw_buf[FLASH_COM_CFG_STATIC_IP],         FLASH_COM_CFG_STATIC_IP_LEN);
-        memcpy(IoTpAd.ComCfg.SubnetMask_IP,    &IoTpAd.flash_rw_buf[FLASH_COM_CFG_SUBNET_MASK_IP], FLASH_COM_CFG_SUBNET_MASK_IP_LEN);
-        memcpy(IoTpAd.ComCfg.DNS_IP,        &IoTpAd.flash_rw_buf[FLASH_COM_CFG_DNS_SERVER_IP],  FLASH_COM_CFG_DNS_SERVER_IP_LEN);
-        memcpy(IoTpAd.ComCfg.GateWay_IP,    &IoTpAd.flash_rw_buf[FLASH_COM_CFG_GATEWAY_IP],     FLASH_COM_CFG_GATEWAY_IP_LEN);
-        memcpy(IoTpAd.ComCfg.IoT_ServeIP,    &IoTpAd.flash_rw_buf[FLASH_COM_CFG_IOT_SERVER_IP],     FLASH_COM_CFG_IOT_SERVER_IP_LEN);
-
-        if ( ((IoTpAd.ComCfg.IoT_TCP_Srv_Port == 0) || (IoTpAd.ComCfg.IoT_TCP_Srv_Port == 0xFFFF)) ||
-             ((IoTpAd.ComCfg.Local_TCP_Srv_Port == 0) || (IoTpAd.ComCfg.Local_TCP_Srv_Port == 0xFFFF)) ||
-             ((IoTpAd.ComCfg.IoT_UDP_Srv_Port == 0) || (IoTpAd.ComCfg.IoT_UDP_Srv_Port == 0xFFFF)) ||
-             ((IoTpAd.ComCfg.Local_UDP_Srv_Port == 0) || (IoTpAd.ComCfg.Local_UDP_Srv_Port == 0xFFFF)) ||
-             (check_data_valid(IoTpAd.ComCfg.STATIC_IP,    MAC_IP_LEN) == FALSE) ||
-             (check_data_valid(IoTpAd.ComCfg.SubnetMask_IP,MAC_IP_LEN) == FALSE) ||
-             (check_data_valid(IoTpAd.ComCfg.DNS_IP,       MAC_IP_LEN) == FALSE) ||
-             (check_data_valid(IoTpAd.ComCfg.GateWay_IP,   MAC_IP_LEN) == FALSE) ||
-             (check_data_valid(IoTpAd.ComCfg.IoT_ServeIP,  MAC_IP_LEN) == FALSE) ) {
-            default_ip_cfg();
-        }
-
-        memcpy(IoTpAd.ComCfg.CmdPWD, &IoTpAd.flash_rw_buf[FLASH_COM_CFG_CMD_PWD],  FLASH_COM_CFG_CMD_PWD_LEN);
-    } else {
-        reset_com_cfg(TRUE);
-    }
-#else
     default_boot_cfg();
     default_uart_cfg();
     default_ip_cfg();
@@ -613,19 +547,11 @@ bool load_com_cfg(void)
         IoTpAd.ComCfg.UART_DataBits    =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_UART_DATA_BITS];
         IoTpAd.ComCfg.UART_Parity     =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_UART_PARITY];
         IoTpAd.ComCfg.UART_StopBits    =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_UART_STOP_BITS];
-
-        if ((IoTpAd.ComCfg.UART_Baudrate < UART_BAUD_300) || (IoTpAd.ComCfg.UART_Baudrate > UART_BAUD_3200000) ||
-            (IoTpAd.ComCfg.UART_Parity > pa_space) ||
-            ((IoTpAd.ComCfg.UART_DataBits < len_7) || (IoTpAd.ComCfg.UART_DataBits > len_8))  ||
-            ((IoTpAd.ComCfg.UART_StopBits < sb_1)  || (IoTpAd.ComCfg.UART_StopBits > sb_1_5)) ) {
-            default_uart_cfg();
-        }
     }
     else
     {
         reset_com_cfg(TRUE);
     }
-#endif
 
     return TRUE;
 }
@@ -639,8 +565,6 @@ bool load_com_cfg(void)
 ========================================================================*/
 bool reset_com_cfg(bool bUpFlash)
 {
-    //printf_high("%s \n",__FUNCTION__);
-
     /* Notice: erase Common config Flash region , default size is one sector [4KB] */
     spi_flash_erase_sector(FLASH_COM_CFG_BASE);
 
@@ -677,7 +601,6 @@ bool reset_com_cfg(bool bUpFlash)
         memcpy(&IoTpAd.flash_rw_buf[FLASH_COM_CFG_CMD_PWD],        Com_Cfg.CmdPWD ,         PASSWORD_MAX_LEN);
 
         spi_flash_write(FLASH_COM_CFG_BASE, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
-
     }
 
     return TRUE;
