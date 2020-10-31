@@ -912,6 +912,17 @@ int16 iot_atcmd_parser(puchar cmd_buf, int16 AtCmdLen)
     }
 #endif
 
+#if (ATCMD_SW_SUPPORT == 1)
+    /* Format:    AT#AP+enter */
+    /* Format:    AT#STA+enter */
+    else if (!memcmp(cmd_buf,AT_CMD_AP,sizeof(AT_CMD_AP)-1)) {
+        iot_switch_to_ap();
+    }
+    else if (!memcmp(cmd_buf,AT_CMD_STA,sizeof(AT_CMD_STA)-1)) {
+        iot_switch_to_sta();
+    }
+#endif
+
     return ret_code;
 }
 

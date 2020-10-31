@@ -1130,4 +1130,9 @@ bool  set_ate_efuse_write(IN uint16 Offset,  IN uint8 data);
 bool set_ate_efuse_read(IN uint16 Offset, OUT uint8 *pdata) XIP_ATTRIBUTE(".xipsec0");
 #endif
 
+#if (ATCMD_SW_SUPPORT == 1)
+void iot_switch_to_sta();
+void iot_switch_to_ap();
+#endif
+
 #endif /*_IOT_API_H_*/

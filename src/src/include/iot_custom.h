@@ -113,6 +113,8 @@
 #define        AT_CMD_BBP_SET            "BBP "
 #define        AT_CMD_RF_SET              "RF "
 
+#define        AT_CMD_AP                      "AP"
+#define        AT_CMD_STA                    "STA"
 
 /*Default output value for GPIO0~4*/
 #define DEFAULT_GPIO04_OUTVAL            (1)
