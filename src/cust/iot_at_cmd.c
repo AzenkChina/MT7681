@@ -142,31 +142,26 @@ int16 iot_exec_atcmd_ate_cal2(puchar pCmdBuf, int16 AtCmdLen)
             case 'C':
                 /*ATE Set Channel   (0~14)*/
                 num = simple_strtol(optarg,&endptr,10);
-                //printf_high("1-SwitchCH:%d\n",num);
                 Set_ATE_Switch_CH((uint8)num);
                 break;
             case 'm':
                 /*ATE Tx Mode        (0:CCK, 1:OFDM, 2:HTMIX,  3:HT_GREEN_FIELD)*/
                 num = simple_strtol(optarg,&endptr,10);
-                //printf_high("2-TxMode:%d\n",num);
                 Set_ATE_TX_MODE_Proc((uint8)num);
                 break;
             case 'c':
                 /*ATE MCS rate       (MCS num is ralated with TxMode)*/
                 num = simple_strtol(optarg,&endptr,10);
-                //printf_high("3-MCS:%d\n",num);
                 Set_ATE_TX_MCS_Proc((uint8)num);
                 break;
             case 'b':
                 /*ATE Bandwidth      (0:BW_20,   1:BW_40)*/
                 num = simple_strtol(optarg,&endptr,10);
-                //printf_high("4-BW:%d\n",num);
                 MT7681_Set_ATE_TX_BW_Proc((uint8)num);
                 break;
             case 'g':
                 /*ATE ShortGI Mode        (0:Full GI    1:Half GI)*/
                 num = simple_strtol(optarg,&endptr,10);
-                //printf_high("5-GI:%d\n",num);
                 Set_ATE_TX_GI_Proc((uint8)num);
                 //open this function with num=0,  no frame be detect by sniffer with this command
                 //AT#ATECAL -S1 -C1 -m2 -c7 -b0 -g0 -l800 -f65 -p30 -n100000
@@ -175,48 +170,40 @@ int16 iot_exec_atcmd_ate_cal2(puchar pCmdBuf, int16 AtCmdLen)
             case 'f':
                 /*ATE Freq Offset              (0~FF)*/
                 num = simple_strtol(optarg,&endptr,10);
-                //printf_high("7-FreqOffset:%d\n",num);
                 Set_ATE_TX_FREQ_OFFSET_Proc((uint8)num);  //system halt if call this function, maybe stack issue
                 break;
             case 'p':
                 /*ATE Tx Power                 (0~47)*/
                 num = simple_strtol(optarg,&endptr,10);
-                //printf_high("8-TxPower:%d\n",num);
                 Set_ATE_TX_POWER((uint32)num);
                 break;
             case 'l':   //default length : ATE_TX_PAYLOAD_LEN=800
                 num = simple_strtol(optarg,&endptr,10);
-                //printf_high("6-PayloadLen:%d\n",num);
                 Set_ATE_TX_PAYLOAD_LEN((uint32)num);
                 break;
             case 'n':
                 /*ATE Tx Frame Sent Counter   (0~0xFFFFFFF)*/
                 num = simple_strtol(optarg,&endptr,10);
-                //printf_high("9-SentCounter:%d\n",num);
                 Set_ATE_TX_COUNT_Proc((uint32)num);
                 break;
             case 'r':
                 /*ATE Tx Frame Sent Speed   (0~0xFFFFFFF), unit:1ms*/
                 num = simple_strtol(optarg,&endptr,10);
-                //printf_high("10-SentSpeed:%d ms\n",num);
                 Set_ATE_TX_Speed_Proc((uint32)num);
                 break;
             case 'u':
                 /*ATE Tx Count in every -r uint  (0~20)*/
                 num = simple_strtol(optarg,&endptr,10);
-                //printf_high("11-SetTxCntPerSpeed: %d \n",num);
                 Set_ATE_TX_Cnt_Per_Speed((uint32)num);
                 break;
             case 't':   //default time/duration : ATE_RX_CNT_DURATION=1000
                 /*ATE Rx Count Duration  (0~0xFFFFFFF), unit:1ms*/
                 num = simple_strtol(optarg,&endptr,10);
-                //printf_high("12-SetRxCntDuration:%d ms\n",num);
                 Set_ATE_RX_DURATION((uint32)num);
                 break;
             case 'P':  //set BBP Tx Power0 (Range:[0~3], 
                 //0-NormalTxPwr, 1-DropTxPwrBy6dB, 2-DropTxPwrBy12dB, 3-AddTxPwrBy6dB)
                 num = simple_strtol(optarg,&endptr,10);
-                //Printf_High("13-SetBBPTxPower:%d ms\n",num);
                 OldValue = Set_ATE_BBP_TXPWR0((uint8)num);
                 printf_high("(BBPTxPwr0 Old=%d, New=%d)\n", OldValue, num);
                 break;
@@ -316,9 +303,6 @@ uint8 ate_cmd_cali_hdlr(char *pBuf, int16 Len)
     Data++;   /*not include character "="  or "space"*/
     DataLen = Len-CmdLen-1;
 
-    //printf_high("LINE:%d, Cmd[%s], CmdLen[%d]\n",__LINE__, Cmd, CmdLen);
-    //printf_high("LINE:%d, Data[%s], Len[%d]\n",__LINE__, Data, DataLen);
-
     if (!memcmp(Cmd,"ATE",CmdLen)) {
         if (!memcmp(Data,"ATESTART",strlen("ATESTART"))) {
             ATE_INIT();
@@ -332,47 +316,38 @@ uint8 ate_cmd_cali_hdlr(char *pBuf, int16 Len)
     } else if (!memcmp(Cmd,"ATECHANNEL",CmdLen)) {
         /*ATE Set Channel        (0~14)*/
         num = simple_strtol(Data, &endptr,10);
-        //printf_high("1-SwitchCH:%d\n",num);
         Set_ATE_Switch_CH((uint8)num);
     } else if (!memcmp(Cmd,"ATETXMODE",CmdLen)) {
         /*ATE Tx Mode         (0:CCK, 1:OFDM, 2:HTMIX,  3:HT_GREEN_FIELD)*/
         num = simple_strtol(Data, &endptr,10);
-        //printf_high("2-TxMode:%d\n",num);
         Set_ATE_TX_MODE_Proc((uint8)num);
     } else if (!memcmp(Cmd,"ATETXMCS",CmdLen)) {
         /*ATE MCS rate         (MCS num is ralated with TxMode)*/
         num = simple_strtol(Data, &endptr,10);
-        //printf_high("3-MCS:%d\n",num);
         Set_ATE_TX_MCS_Proc((uint8)num);
     } else if (!memcmp(Cmd,"ATETXBW",CmdLen)) {
         /*ATE Bandwidth          (0:BW_20,     1:BW_40)*/
         num = simple_strtol(Data, &endptr,10);
-        //printf_high("4-BW:%d\n",num);
         MT7681_Set_ATE_TX_BW_Proc((uint8)num);
     } else if (!memcmp(Cmd,"ATETXGI",CmdLen)) {
         /*ATE ShortGI Mode          (0:Full GI    1:Half GI)*/
         num = simple_strtol(Data, &endptr,10);
-        //printf_high("5-GI:%d\n",num);
         Set_ATE_TX_GI_Proc((uint8)num);
     } else if (!memcmp(Cmd,"ATETXLEN",CmdLen)) {
         //default length : ATE_TX_PAYLOAD_LEN=800
         num = simple_strtol(Data, &endptr,10);
-        //printf_high("6-PayloadLen:%d\n",num);
         Set_ATE_TX_PAYLOAD_LEN((uint32)num);
     } else if (!memcmp(Cmd,"ATETXFREQOFFSET",CmdLen)) {
         /*ATE Freq Offset               (0~FF)*/
         num = simple_strtol(Data, &endptr,10);
-        //printf_high("7-FreqOffset:%d\n",num);
         Set_ATE_TX_FREQ_OFFSET_Proc((uint8)num);
     } else if (!memcmp(Cmd,"ATETXPOW0",CmdLen)) {
         /*ATE Tx Power               (0~47)*/
         num = simple_strtol(Data, &endptr,10);
-        //printf_high("8-TxPower:%d\n",num);
         Set_ATE_TX_POWER((uint32)num);
     } else if (!memcmp(Cmd,"ATETXCNT",CmdLen)) {
         /*ATE Tx Frame Sent Counter   (0~0xFFFFFFF)*/
         num = simple_strtol(Data, &endptr,10);
-        //printf_high("9-SentCounter:%d\n",num);
         Set_ATE_TX_COUNT_Proc((uint32)num);
     } else if (!memcmp(Cmd,"ATEDA",CmdLen)) {
         /*not support*/
@@ -460,9 +435,6 @@ int16 iot_exec_atcmd_ate_cal(puchar cmd_buf, int16 Len)
         DataLen = Len-CmdLen-1;
     }
     memcpy(Cmd, (char *)cmd_buf, CmdLen);
-
-    //printf_high("LINE:%d, Cmd[%s], CmdLen[%d]\n",__LINE__, Cmd, CmdLen);
-    //printf_high("LINE:%d, Data[%s], Len[%d]\n",__LINE__, Data, DataLen);
 
     if (!memcmp(Cmd,"set",CmdLen)) {
         ate_cmd_cali_hdlr(Data, DataLen); /*not include 1st Space*/
@@ -565,20 +537,17 @@ int16 iot_exec_atcmd_efuse_set(puchar pCmdBuf, int16 AtCmdLen)
             case 'r':
                 /*Efuse Read Offset*/
                 num = simple_strtol(optarg,&endptr,0);
-                //printf_high("0-Read Offset:%d\n",num);
                 if ( set_ate_efuse_read((uint16)num, &eData) == TRUE )
                     printf_high("[0x%x]=0x%02x\n",num, eData);
                 break;
             case 's':
                 /*Efuse Write Offset*/
                 num = simple_strtol(optarg,&endptr,0);
-                //printf_high("1-Write Offset:%d\n",num);
                 eOffset = (uint16)num;
                 break;
             case 'v':
                 /*Efuse Write Value*/
                 num = simple_strtol(optarg,&endptr,0);
-                //printf_high("2-Write Value:%d\n",num);
                 if ( set_ate_efuse_write(eOffset, (uint8)num) == FALSE)
                     printf_high("Offset must a even num\n");
                 break;
@@ -909,8 +878,6 @@ int16 iot_atcmd_parser(puchar cmd_buf, int16 AtCmdLen)
     //PKT_DESC     *rx_desc = &(UARTPort.Rx_desc);
 
     cmd_buf[AtCmdLen] = '\0';
-    //printf_high("AT command: %s , len=%d \n",cmd_buf, AtCmdLen);
-    //printf_high("ring buf:pkt=%d,R=%d,W=%d\n", rx_desc->pkt_num,BRead(rx_ring),BWrite(rx_ring));
 
     /* The current process is not encough*/
     /* need improve for the command type and paramters parsing */
@@ -972,7 +939,6 @@ int16 iot_atcmd_parser(puchar cmd_buf, int16 AtCmdLen)
     /* Format:    AT#FLASH -r6 +enter*/
     /* Format:    AT#FLASH -s6 -v56+enter*/
     else if (!memcmp(cmd_buf,AT_CMD_FLASH_SET,sizeof(AT_CMD_FLASH_SET)-1)) {
-        //printf_high("Flash Write/Read \n");
         ret_code = iot_atcmd_exec_flash(cmd_buf, AtCmdLen);
     }
 #endif
@@ -980,14 +946,12 @@ int16 iot_atcmd_parser(puchar cmd_buf, int16 AtCmdLen)
     /* Format:    AT#EFUSE -r6 +enter*/
     /* Format:    AT#EFUSE -s6 -v56 +enter*/
     else if (!memcmp(cmd_buf,AT_CMD_EFUSE_SET,sizeof(AT_CMD_EFUSE_SET)-1)) {
-        //printf_high("Efuse Write/Read \n");
         ret_code = iot_exec_atcmd_efuse_set(cmd_buf, AtCmdLen);
     }
 #endif
 #if (ATCMD_ATE_SUPPORT == 1)  //20140528 delete old ATE calibration cmd handler,  be instead of iwpriv cmd format handler
     /* Format:    AT#ATECAL -C1 -m1 -c7 -g0 -f65 -p30 -n100000+enter*/
     else if (!memcmp(cmd_buf,AT_CMD_ATE_CAL,sizeof(AT_CMD_ATE_CAL)-1)) {
-        //printf_high("ATECAL \n");
         gATEInfo.ATECmdFmt = ATE_CMD_TYPE_AT;
         ret_code = iot_exec_atcmd_ate_cal2(cmd_buf, AtCmdLen);
     }

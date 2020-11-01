@@ -419,7 +419,6 @@ bool WifiRxDoneInterruptHandle (
     if (pBufDesc->Length < sizeof(HEADER_802_11) + RXINFO_SIZE + RXWI_SIZE)  {
         if (pBufDesc->Length != (16 + RXINFO_SIZE + RXWI_SIZE))  {
             /*not  NULL  or PS-Poll  Packet,  and invalid packet length */
-            //printf_high("Err len=%d\n", pBufDesc->Length);
             return FALSE;
         }
         /*PS-Poll Packet should be deal with in APHandleRxControlFrame()*/
@@ -427,7 +426,6 @@ bool WifiRxDoneInterruptHandle (
 #else
     if (pBufDesc->Length <= sizeof(HEADER_802_11) +RXINFO_SIZE +RXWI_SIZE) {
         // invalid packet length
-        //printf_high("Err len=%d\n", pBufDesc->Length);
         return FALSE;
     }
 #endif
@@ -488,9 +486,6 @@ bool WifiRxDoneInterruptHandle (
 #if (IOT_SMP_RSSI_COLLECT == 1)
     iot_rssi_sample(&gRxRSSIInfo, RxCell.pRxWI);
 #endif
-
-    //printf_high("%s,%d    BufDescLen(%d) , Type/SubType:(0x%x,0x%x) \n",
-    //    __FUNCTION__,__LINE__,pBufDesc->Length, pHeader->FC.Type, pHeader->FC.SubType);
 
     switch (pHeader->FC.Type) {
             /* CASE I, receive a MANAGEMENT frame */

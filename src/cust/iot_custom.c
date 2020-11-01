@@ -133,9 +133,6 @@ void iot_cust_scan_done(void)
         RtmpPasswordHash(pIoTStaCfg->Passphase, pIoTStaCfg->Ssid,
                          pIoTStaCfg->SsidLen,   keyMaterial);
         memcpy(pIoTStaCfg->PMK, keyMaterial, LEN_PMK);
-
-        //printf_high("keyMaterial:");
-        //dump(keyMaterial, 40);
     }
 #endif
 #endif
@@ -662,23 +659,6 @@ bool reset_ap_cfg(void)
 ========================================================================*/
 void iot_cust_gpiint_hdlr(IN uint8 GPI_STS)
 {
-//    if ((GPI_STS >> 0) & 0x01) {
-//        printf_high("GPIO_0 interrupted\n");
-//    } else if ((GPI_STS >> 1) & 0x01) {
-//        printf_high("GPIO_1 interrupted\n");
-//    } else if ((GPI_STS >> 2) & 0x01) {
-//        printf_high("GPIO_2 interrupted\n");
-//    } else if ((GPI_STS >> 3) & 0x01) {
-//        printf_high("GPIO_3 interrupted\n");
-//    } else if ((GPI_STS >> 4) & 0x01) {
-//        printf_high("GPIO_4 interrupted\n");
-//    } else if ((GPI_STS >> 5) & 0x01) {
-//        printf_high("GPIO_5 interrupted\n");
-//    } else if ((GPI_STS >> 6) & 0x01) {
-//        printf_high("GPIO_6 interrupted\n");
-//    } else {
-//        printf_high("Ignored\n");
-//    }
 }
 
 

@@ -87,7 +87,6 @@ void wifi_rx_proc(void)
     while (pRxPktQueue->Amount > 0) {
         pBufDesc = apiQU_Dequeue(pRxPktQueue);
         if (pBufDesc ==NULL) {
-            //printf_high("=>%s DeQ fail\n",__FUNCTION__);
             return;
         }
 
@@ -510,9 +509,6 @@ void iot_stacfg_update(uint8 *pSSID, uint8 AuthMode, uint8 *pPassword)
 
             NdisZeroMemory(pIoTStaCfg->Passphase, sizeof(pIoTStaCfg->Passphase));
             NdisMoveMemory(pIoTStaCfg->Passphase, pPassword, PSWLen);
-
-            //printf_high("%s %d PassphaseLen= %d \n",__FUNCTION__,__LINE__,pIoTStaCfg->PassphaseLen);
-            //dump(pIoTStaCfg->Passphase, pIoTStaCfg->PassphaseLen);
         }
     }
 }

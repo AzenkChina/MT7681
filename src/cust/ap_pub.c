@@ -319,9 +319,6 @@ void iot_apcfg_update(uint8 *pSSID, uint8 AuthMode, uint8 *pPassword, uint8 Chan
 
             NdisZeroMemory(pIoTApCfg->MBSSID.Passphase, sizeof(pIoTApCfg->MBSSID.Passphase));
             NdisMoveMemory(pIoTApCfg->MBSSID.Passphase, pPassword, PSWLen);
-
-            //printf_high("%s %d PassphaseLen= %d \n",__FUNCTION__,__LINE__,pIoTApCfg->MBSSID.PassphaseLen);
-            //dump(pIoTApCfg->MBSSID.Passphase, pIoTApCfg->MBSSID.PassphaseLen);
         }
     }
 

@@ -137,14 +137,9 @@ void iot_udp_pkt_send( puchar pSrcAddr,
     struct udppseudohdr    *pUdppseudohdr = &Udppseudohdr;
     uint8 *pIotpkt;
 
-    //struct  t_IoTCtrlProtocolHeader * ProtocolHeader_out = (struct t_IoTCtrlProtocolHeader *)(pPayload);
-    //printf_high("1=:%02x:%02x:%02x:%02x:%02x:%02x \n",PRINT_MAC(ProtocolHeader_out->SendMAC));
-    //printf_high("2=:%02x:%02x:%02x:%02x:%02x:%02x \n",PRINT_MAC(ProtocolHeader_out->ReceiveMAC));
-
     //handle_FCE_TxTS_interrupt();
     pBufDesc = apiQU_Dequeue(&gFreeQueue2);
     if (pBufDesc ==NULL) {
-        //printf_high("=>%s DeQ fail\n",__FUNCTION__);
         return;
     }
     mpool = pBufDesc->pBuf;

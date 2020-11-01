@@ -444,10 +444,6 @@ dhcpd_init()
     uip_softap_ipaddr = ntohl(uip_hostaddr[0]|(uip_hostaddr[1]<<16));
     uip_softap_netmask = ntohl(uip_netmask[0]|(uip_netmask[1]<<16));
 
-//    printf_high("dhcp server:%d.%d.%d.%d\n",
-//        (uip_softap_ipaddr&0xff000000)>>24,(uip_softap_ipaddr&0x00ff0000)>>16,
-//        (uip_softap_ipaddr&0x0000ff00)>>8,uip_softap_ipaddr&0x000000ff);
-
     memset(uip_dhpcd_conns,0,sizeof(uip_dhpcd_conns));
 
     uip_ipaddr(Remoteaddr, 255,255,255,255);

@@ -95,13 +95,11 @@ int32 iot_app_proc_func_pkt(
     Status_out = (Status *) Data_out;
 
     if (memcmp(&pPacketInfo->SessionID,  IoTpAd.ComCfg.CmdPWD, PASSWORD_MAX_LEN)) {
-        //printf_high("wrong iot device password\n");
         return 0;
     }
 
     switch (FunctionType) {
         case GPIO_SET_REQUEST :
-            //printf_high("GPIO_SET_REQUEST\n");
             GPIO_Value = GpioData->GPIO_Value;
             if (Dataheader->Type == GPIO_INFORMATION) {
                 if (pPacketInfo->Sequence != preSeq) {
@@ -114,10 +112,8 @@ int32 iot_app_proc_func_pkt(
 #endif
                         if ((GPIO_Value)&((uint32)1<<i)) {
                             iot_gpio_output(i,1);
-                            //printf_high("iot gpio ok high: %d \n", i);
                         } else {
                             iot_gpio_output(i,0);
-                            //printf_high("iot gpio ok low: %d \n", i);
                         }
                     }
                 }
@@ -130,7 +126,6 @@ int32 iot_app_proc_func_pkt(
             break;
 
         case PWM_SET_REQUEST:
-               //printf_high("PWM_SET_REQUEST\n");
 #if (IOT_PWM_SUPPORT == 1)
             if (Dataheader->Type == PWM_INFORMATION) {
                 uint16 def_resolution=0;
@@ -168,7 +163,6 @@ int32 iot_app_proc_func_pkt(
             break;
 
         case UART_SET_REQUEST:
-            //printf_high("UART_SET_REQUEST\n");
             if (Dataheader->Type == UART_INFORMATION) {
                 if (pPacketInfo->Sequence != preSeq) {
                     if (Dataheader->Length != appLen - CP_HDR_LEN - CP_DATA_HDR_LEN)  {
@@ -186,7 +180,6 @@ int32 iot_app_proc_func_pkt(
             break;
 
         case GPIO_GET_REQUEST:
-            //printf_high("GPIO_GET_REQUEST\n");
             IoT_build_app_response_header(iot_buffer, FUNCTION, GPIO_GET_RESPONSE, GPIO_INFORMATION, sizeof(GPIO_Information), pPacketInfo);
 
             GPIO_Information_out->GPIO_List = 0;
@@ -207,15 +200,12 @@ int32 iot_app_proc_func_pkt(
                 if (gpio_input == 1) {
                     GPIO_Information_out->GPIO_Value |= ((uint32)0x01<<i);
                 }
-                //printf_high("gpio %d input: %d\n",i,gpio_input);
             }
 
-            //printf_high("gpio list&value %x,%x: %d\n",GPIO_Information_out->GPIO_List,GPIO_Information_out->GPIO_Value);
             payload_len = (uint16)(CP_HDR_LEN+CP_DATA_HDR_LEN+sizeof(GPIO_Information));
             break;
 
         case PWM_GET_REQUEST:
-            //printf_high("PWM_GET_REQUEST\n");
             IoT_build_app_response_header(iot_buffer, FUNCTION, PWM_GET_RESPONSE, PWM_INFORMATION, sizeof(PWM_Information), pPacketInfo);
 
             LedData_out->RedLevel = mt7681_HardwareStatus.RedLevel;
@@ -262,19 +252,13 @@ int32 iot_app_proc_mgmt_pkt(
     Status_out = (Status *) Data_out;
     PswdData = (uint8 *)Data;
 
-    //printf_high("IoT_CmdPWD: %x,%x,%x,%x,%x\n",   Dataheader->Length,
-    //                        IoTpAd.ComCfg.CmdPWD[0],IoTpAd.ComCfg.CmdPWD[1], IoTpAd.ComCfg.CmdPWD[2],IoTpAd.ComCfg.CmdPWD[3]));
-    //printf_high("PacketInfo.SessionID: %x\n",pPacketInfo->SessionID);
-
     if (ManagementType != QUERY_CAPAB_REQUEST &&
         (memcmp(&pPacketInfo->SessionID, IoTpAd.ComCfg.CmdPWD, sizeof(IoTpAd.ComCfg.CmdPWD)))) {
-        //printf_high("wrong iot device password\n");
         return 0;
     }
 
     switch (ManagementType) {
         case QUERY_CAPAB_REQUEST:
-            //printf_high("CAPAB_REQ\n");
             IoT_build_app_response_header(iot_buffer, MANAGEMENT, QUERY_CAPAB_RESPONSE,
                                           CLIENT_CAPABILITY, sizeof(ClientCapability), pPacketInfo);
 
@@ -290,7 +274,6 @@ int32 iot_app_proc_mgmt_pkt(
             break;
 
         case CONTROL_CLIENT_OFFLINE_REQUEST:
-            //printf_high("OFFLINE_REQUEST\n");
             IoT_build_app_response_header(iot_buffer, MANAGEMENT, CONTROL_CLIENT_OFFLINE_RESPONSE, STATUS, sizeof(Status), pPacketInfo);
             Status_out->StatusCode = 0;
             payload_len = (uint16)(CP_HDR_LEN+CP_DATA_HDR_LEN+sizeof(Status));
@@ -309,20 +292,13 @@ int32 iot_app_proc_mgmt_pkt(
             break;
 
         case CONTROL_PASSWORD_SET_REQUEST:
-            //printf_high("PASSWORD_SET_REQUEST\n");
             Status_out->StatusCode = 0;
-            //printf_high("memcpy IoT_CmdPWD_Recv: %x,%x,%x,%x,%x\n", Dataheader->Length, PswdData[0],PswdData[1], PswdData[2],PswdData[3]);
             memcpy(IoT_CmdPWD_Recv, PswdData, PASSWORD_MAX_LEN);
             IoT_build_app_response_header(iot_buffer, MANAGEMENT, CONTROL_PASSWORD_SET_RESPONSE, STATUS, sizeof(Status), pPacketInfo);
             payload_len = (uint16)(CP_HDR_LEN+CP_DATA_HDR_LEN+sizeof(Status));
             break;
 
         case CONTROL_PASSWORD_SET_CONFIRM:
-            //printf_high("PASSWORD_SET_CONFIRM\n"));
-            //printf_high("memcpy IoT_CmdPWD: %x,%x,%x,%x\n", IoTpAd.ComCfg.CmdPWD[0], IoTpAd.ComCfg.CmdPWD[1], IoTpAd.ComCfg.CmdPWD[2], IoTpAd.ComCfg.CmdPWD[3]);
-            //printf_high("memcpy IoT_CmdPWD_Recv: %x,%x,%x,%x\n",
-            //                        IoT_CmdPWD_Recv[0], IoT_CmdPWD_Recv[1], IoT_CmdPWD_Recv[2], IoT_CmdPWD_Recv[3]);
-
             memcpy(IoTpAd.ComCfg.CmdPWD, IoT_CmdPWD_Recv, PASSWORD_MAX_LEN);
 
             /*store the Cmd Password*/
@@ -357,22 +333,18 @@ int32 iot_app_proc_pkt(
     ProtocolHeader = (IoTCtrlProtocolHeader *)packet;
     Dataheader = (DataHeader *)(packet+CP_HDR_LEN);
     appLen = rawpacketlength;
-    //printf_high("iot_app_proc_pkt\n");
     if (rawpacketlength <= 4)
         return -1;
 
-    //printf_high("Mg:%x\n",ProtocolHeader->Magic);
     if (ProtocolHeader->Magic != IOT_MAGIC_NUMBER)
         return -2;
 
     if (MAC_ADDR_EQUAL(gCurrentAddress,ProtocolHeader->SendMAC)) {
-        //printf_high("drop self's packet\n");
         return -3;
     }
 
     if (!MAC_ADDR_EQUAL(gCurrentAddress, ProtocolHeader->ReceiveMAC) &&
         !MAC_ADDR_EQUAL(BCAST_ADDR, ProtocolHeader->ReceiveMAC)) {
-        //printf_high("ReceiveMAC error\n");
         return -4;
     }
     PacketInfo.SessionID = ProtocolHeader->SessionID;
@@ -380,9 +352,6 @@ int32 iot_app_proc_pkt(
 
     COPY_MAC_ADDR(PacketInfo.ReceiveMAC, ProtocolHeader->ReceiveMAC);
     COPY_MAC_ADDR(PacketInfo.SendMAC, ProtocolHeader->SendMAC);
-
-    //printf_high("sendmac: %02x:%02x:%02x:%02x:%02x:%02x \n",PRINT_MAC(PacketInfo.SendMAC));
-    //printf_high("receiveMAC: %02x:%02x:%02x:%02x:%02x:%02x \n",PRINT_MAC(PacketInfo.ReceiveMAC));
 
     Subtype = ProtocolHeader->SubHdr.field.SubType;
 

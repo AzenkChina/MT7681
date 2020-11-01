@@ -301,9 +301,6 @@ void aes_ecb_encry_test(
         }
         memcpy(Block, pPlain+(index*AES_BLOCK_SIZES), BlockSize);
 
-        //printf_high("index=%d  BlockSize=%d\n", index,BlockSize);
-        //dump(Block, BlockSize);
-
         RT_AES_Encrypt(
             Block,
             AES_BLOCK_SIZES,

@@ -807,7 +807,6 @@ void _uip_process(u8_t flag)
                             label). */
 #if CFG_SUPPORT_TCP_REXMIT
                             /*dongbo modifyed for tcp retransmit.*/
-                            //printf_high("rexmit:\n");
                             uip_slen = uip_connr->len;
                             memcpy(uip_sappdata, uip_connr->rexmit_buf, uip_slen);
 #else
