@@ -10,11 +10,12 @@
 #include "uart_sw.h"
 #endif
 
-extern IOT_ADAPTER       IoTpAd;
-extern u8_t gCurrentAddress[];
-extern u16_t http_clientPort;
 #if (UART_SUPPORT == 1)
 extern UARTStruct UARTPort;
+#endif
+#if (ATCMD_RECOVERY_SUPPORT==0)
+extern volatile uint8 gCommandSupport;
+extern volatile bool  PRINT_FLAG;
 #endif
 /*---------------------------------------------------------------------------*/
 /*
@@ -176,11 +177,15 @@ void handle_tcp_srv_app1(void)
     char *cptr;
 
     if (uip_newdata()) {
-	if((uip_datalen() > 8) && (uip_datalen() < AT_CMD_MAX_LEN)) {
-		cptr = (char *)uip_appdata;
-		if((cptr[0] == 'A') && (cptr[1] == 'T') && (cptr[2] == '#'))
-			result = iot_atcmd_parser(&cptr[3], (uip_datalen()-3));
-	}
+        if((uip_datalen() > 3) && (uip_datalen() < AT_CMD_MAX_LEN)) {
+#if (ATCMD_RECOVERY_SUPPORT==0)
+            gCommandSupport = 0xff;
+            PRINT_FLAG = TRUE;
+#endif
+            cptr = (char *)uip_appdata;
+            if((cptr[0] == 'A') && (cptr[1] == 'T') && (cptr[2] == '#'))
+                result = iot_atcmd_parser(&cptr[3], (uip_datalen()-3));
+        }
     }
 
     if (uip_poll()) {
@@ -197,20 +202,20 @@ void handle_tcp_srv_app1(void)
 void handle_tcp_srv_app2(void)
 {
 #if (UART_SUPPORT ==1)
-#if (ATCMD_SUPPORT == 0)
     int16  i = 0;
     int16 rx_len = 0;
     BUFFER_INFO *rx_ring = &(UARTPort.Rx_Buffer);
     char *cptr;
 #endif
-#endif
 
     if (uip_newdata()) {
 #if (UART_SUPPORT ==1)
-#if (ATCMD_SUPPORT == 0)
+#if (ATCMD_RECOVERY_SUPPORT==0)
+        if(gCommandSupport == 0) {
             if(uip_datalen() > 0) {
             	iot_uart_output(uip_appdata, (int16)uip_datalen());
             }
+        }
 #endif
 #endif
     }
@@ -218,7 +223,8 @@ void handle_tcp_srv_app2(void)
     if (uip_poll()) {
         /* below codes shows how to send data to client  */
 #if (UART_SUPPORT ==1)
-#if (ATCMD_SUPPORT == 0)
+#if (ATCMD_RECOVERY_SUPPORT==0)
+        if(gCommandSupport == 0) {
             cptr = (char *)uip_appdata;
             Buf_GetBytesAvail(rx_ring, rx_len);
             if(rx_len <= 0) {
@@ -231,6 +237,7 @@ void handle_tcp_srv_app2(void)
                 Buf_Pop(rx_ring, cptr[i]);
             }
             uip_send(uip_appdata, i);
+        }
 #endif
 #endif
     }
@@ -247,19 +254,19 @@ void handle_tcp_srv_app3(void)
 	uint32 gpio_set, gpio_event;
 
     if (uip_newdata()) {
-	sta = 0xff;
-	cptr = (char *)uip_appdata;
-	if(uip_datalen() >= 4) {
-		cptr[4] = 0;
-		if(strcmp(cptr, "STA0") == 0) {
-			 iot_gpio_output(2,  0);
-			 sta = 0;
-		}
-		else if(strcmp(cptr, "STA1") == 0) {
-			iot_gpio_output(2,  1);
-			sta = 1;
-		}
-	}
+        sta = 0xff;
+        cptr = (char *)uip_appdata;
+        if(uip_datalen() >= 4) {
+            cptr[4] = 0;
+            if(strcmp(cptr, "STA0") == 0) {
+                iot_gpio_output(2,  0);
+                sta = 0;
+            }
+            else if(strcmp(cptr, "STA1") == 0) {
+                iot_gpio_output(2,  1);
+                sta = 1;
+            }
+        }
     }
 
     if (uip_poll()) {
@@ -273,11 +280,11 @@ void handle_tcp_srv_app3(void)
 			uip_send(uip_appdata, (strlen("S0E0\n")+1));
 			timer_set(&user_timer, 5*CLOCK_SECOND);
 		}
-	        else if(sta != 0xff) {
-			sprintf(uip_appdata, "STA%c\n", (sta?'1':'0'));
-			uip_send(uip_appdata, (strlen("STA0\n")+1));
-			sta = 0xff;
-	        }
+        else if(sta != 0xff) {
+            sprintf(uip_appdata, "STA%c\n", (sta?'1':'0'));
+            uip_send(uip_appdata, (strlen("STA0\n")+1));
+            sta = 0xff;
+        }
     }
 }
 #endif

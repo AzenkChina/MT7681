@@ -489,6 +489,7 @@ void iot_stacfg_update(uint8 *pSSID, uint8 AuthMode, uint8 *pPassword)
                 SSIDLen = MAX_SSID_LEN;
             }
             pIoTStaCfg->SsidLen = SSIDLen;
+            NdisZeroMemory(pIoTStaCfg->Ssid, sizeof(pIoTStaCfg->Ssid));
             NdisMoveMemory(pIoTStaCfg->Ssid, pSSID, SSIDLen);
         }
     }

@@ -63,7 +63,7 @@ IOT_CUST_TIMER  IoTCustTimer;
 IOT_ADAPTER     IoTpAd;
 
 /*TRUE: printf_high()/DBGPRINT_HIGH() is enabled,    FALSE: printf_high/DBGPRINT_HIGH()  is disabled*/
-bool  PRINT_FLAG = TRUE;
+volatile bool  PRINT_FLAG = TRUE;
 
 /*this is the Common CFG region default table */
 IOT_COM_CFG Com_Cfg = {
@@ -109,7 +109,7 @@ uint8 gCaliFrEfuse = 0x00;
 #if (ATCMD_RECOVERY_SUPPORT==1)
 uint16 gRecoveryModeTime = 4000;
 #else
-uint8 gCommandSupport = 0xff;
+volatile uint8 gCommandSupport = 0xff;
 #endif
 
 /*Indicated if use specified SSID to do scan  (TRUE/FALSE)  */
@@ -447,7 +447,8 @@ bool load_usr_cfg(void)
         else {
             PRINT_FLAG = FALSE;
         }
-    } else {
+    }
+    else {
         gCommandSupport = 0xff;
         reset_usr_cfg(TRUE);
     }

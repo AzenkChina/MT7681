@@ -57,14 +57,14 @@ void split_string_cmd(puchar string_cmd, int16 cmdlen, int16 *pargc, char **argv
     optarg = NULL;
 
     for (i=0; i< cmdlen-1; i++) {
-        if (string_cmd[i] == '-' &&
-            //        (string_cmd[i] == '-' || string_cmd[i] == '/') &&
+        if ((string_cmd[i] == '-') &&
             (string_cmd[i+1]<='0' || string_cmd[i+1]>='9') ) {
             string_cmd[i-1]='\0';
             argv[argc] = (char *)&string_cmd[i];
             argc++;
         }
     }
+
     *pargc=argc;
 
     return;

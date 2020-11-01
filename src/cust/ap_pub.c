@@ -288,9 +288,6 @@ void iot_apcfg_update(uint8 *pSSID, uint8 AuthMode, uint8 *pPassword, uint8 Chan
 {
     uint8 SSIDLen=0, PSWLen=0;
 
-    /*Delete all MAC Entrys in the Entry Table, and send deauth to the connected Client*/
-    MacTableReset();
-
     /*update ssid*/
     if (NULL != pSSID) {
         SSIDLen = (uint8)strlen((char*)pSSID);
@@ -299,6 +296,7 @@ void iot_apcfg_update(uint8 *pSSID, uint8 AuthMode, uint8 *pPassword, uint8 Chan
                 SSIDLen = MAX_SSID_LEN;
             }
             pIoTApCfg->MBSSID.SsidLen = SSIDLen;
+            NdisZeroMemory(pIoTApCfg->MBSSID.Ssid, sizeof(pIoTApCfg->MBSSID.Ssid));
             NdisMoveMemory(pIoTApCfg->MBSSID.Ssid, pSSID, SSIDLen);
         }
     }
@@ -326,8 +324,5 @@ void iot_apcfg_update(uint8 *pSSID, uint8 AuthMode, uint8 *pPassword, uint8 Chan
     if (0 != Channel)  {
         pIoTApCfg->CommonCfg.Channel = Channel;
     }
-    
-    pIoTMlme->TcpInit = FALSE;  /*in order to do TCP_Init() after do AP config change*/
-    iot_ap_startup();
 }
 #endif   //CONFIG_SOFTAP

@@ -38,10 +38,8 @@
 
 /*---------------------------------------------------------------------------*/
 
-extern IOT_CUST_OP IoTCustOp;
 extern MLME_STRUCT *pIoTMlme;
 
-extern u16_t http_clientPort;
 /*---------------------------------------------------------------------------*/
 
 static struct dhcpc_state s;
@@ -447,9 +445,6 @@ void ws_got_ip(void)
 #ifdef CONFIG_STATION
     /*set to default value,  whether go to smnt or not, it should be judged by Flash STA cfg content*/
     pIoTMlme->ATSetSmnt = FALSE;
-
-    if (IoTCustOp.IoTCustWifiSMConnect != NULL)
-        IoTCustOp.IoTCustWifiSMConnect();
 #endif
 }
 
