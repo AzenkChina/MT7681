@@ -294,7 +294,6 @@ uip_arp_arpin(void)
             /* ARP request. If it asked for our address, we send out a
                reply. */
             if (uip_ipaddr_cmp(BUF->dipaddr, uip_hostaddr)) {
-                printf("RX arp req.\n");
                 /* First, we register the one who made the request in our ARP
                 table, since it is likely that we will do more communication
                 with this host in the future. */

@@ -79,7 +79,6 @@ unsigned char *dhcpd_pickup_opt(struct dhcpd *packet, int code, int dest_len, vo
     length = 308;
     while (!done) {
         if (i >= length) {
-            printf( "Option fields too long.\n");
             return 0;
         }
 
@@ -90,7 +89,6 @@ unsigned char *dhcpd_pickup_opt(struct dhcpd *packet, int code, int dest_len, vo
             if (dest) {
                 len = ptr[i + OPT_LEN];
                 if (len > dest_len) {
-                    printf( "Option fields too long to fit in dest.\n");
                     return 0;
                 }
 
@@ -148,11 +146,9 @@ static int discover()
     unsigned char* optptr = NULL;
     uint32 temp = 0;
 
-    printf("recive discover.\n");
     /* block all 0 and all 0xff mac address */
     if (memcmp(oldpacket->chaddr, "\x00\x00\x00\x00\x00\x00", 6) == 0 ||
         memcmp(oldpacket->chaddr, "\xff\xff\xff\xff\xff\xff", 6) == 0) {
-        printf("block all 0 and all 0xff mac address\n");
         return -1;
     }
 
@@ -177,7 +173,6 @@ static int discover()
             }
         }
     }
-    printf("i = %d, j = %d\n", i, j);
     printf_high("Client IP: %d.%d.%d.%d\n",
                 addr&0x000000ff,(addr&0x0000ff00)>>8,
                 (addr&0x00ff0000)>>16,(addr&0xff000000)>>24);
@@ -232,7 +227,6 @@ static int discover()
     //add end
     *optptr++ = DHCP_OPTION_END;
 
-    printf("Send. [%d] data\n", sizeof(struct dhcpd)-308+(optptr-(unsigned char* )packet.options));
     uip_send(&packet,  sizeof(struct dhcpd)-308+(optptr-(unsigned char* )packet.options));
 
     return 1;
@@ -248,26 +242,10 @@ void clear_dhcpd_conns(puchar paddr)
     //find cached mac first.
     for (i = 0; i < UIP_DHCPD_CONNS;  i++)  {
         if (!memcmp(uip_dhpcd_conns[i].chaddr, paddr, 6) )    {
-            printf("%s %d dhcpListidx[%d] \n",__FUNCTION__,__LINE__,i);
-            //dump(paddr, 6);
             uip_dhpcd_conns[i].flag = 0;
             break;
         }
     }
-
-#if 0 /*debug*/
-    {
-        int j;
-        /*jinchuan. bao  for debug*/
-        for (j=0; j<UIP_DHCPD_CONNS; j++) {
-            printf("DhcpNo[%d] Flag=%d  IP: %d.%d.%d.%d \n", j, uip_dhpcd_conns[j].flag,
-                   uip_dhpcd_conns[j].yiaddr &0x000000ff, (uip_dhpcd_conns[j].yiaddr &0x0000ff00)>>8,
-                   (uip_dhpcd_conns[j].yiaddr &0x00ff0000)>>16,(uip_dhpcd_conns[j].yiaddr&0xff000000)>>24);
-            dump(uip_dhpcd_conns[j].chaddr, sizeof(uip_dhpcd_conns[j].chaddr));
-        }
-        dumpMacTable();
-    }
-#endif
 }
 
 static int request()    XIP_ATTRIBUTE(".xipsec0");
@@ -286,13 +264,10 @@ static int request()
     unsigned char* optptr = NULL;
     uint32 temp;
 
-    printf("Recive REQUEST\n");
-
     requested = dhcpd_pickup_opt(oldpacket, DHCP_OPTION_REQ_IPADDR, sizeof(req_ip), &req_ip);
     server_id = dhcpd_pickup_opt(oldpacket, DHCP_OPTION_SERVER_ID, sizeof(server), &server);
 
     if (server_id && server != ntohl(uip_softap_ipaddr)) {
-        printf("Not my server ID\n");
         return -1;
     }
 
@@ -328,7 +303,6 @@ static int request()
     //protect has been done in discover phase,so cancel here??
 
     if (j==UIP_DHCPD_CONNS) {
-        printf("no more ipaddr free.\n");
         return -1;
     }
 
@@ -383,9 +357,6 @@ static int request()
         //*optptr++ = 8;
         //temp=ntohl(uip_softap_ipaddr);
         //optptr = memcpy(optptr, "mt7681", 8);
-
-        printf("%s %d i=[%d], j=[%d],newrecordid=[%d] \n",
-               __FUNCTION__,__LINE__,i,j,newrecordid);
 
         //record cllocated ip addr..
         uip_dhpcd_conns[newrecordid].flag = 1;

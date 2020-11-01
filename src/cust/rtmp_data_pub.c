@@ -164,8 +164,6 @@ void APHandleRxDataFrame(
 
             /*Drop the packets which DA is not Broadcast/Multicast/BSSID address, after packet forwarding*/
             if ((pRxBlk->pHeader->Addr3[0] & 0x1) == 0) {
-                printf("Drop packets after forwarding: 0x%x,0x%x,0x%x,0x%x,0x%x,0x%x \n",
-                       PRINT_MAC(pRxBlk->pHeader->Addr3));
                 return;
             }
         }
@@ -179,7 +177,6 @@ void APHandleRxDataFrame(
     if (!memcmp(pRxBlk->pData, EAPOL, 2)) {
         /* Confirm incoming is EAPOL-KEY frame */
         if ( *(pRxBlk->pData + 3) == EAPOLKey) {
-            printf("EAPOL KEY +++\n");
 
             /*pData include 2Byte Protocol type(0x888E) of 802.2 LLC header, so delete Protocol type  */
             /*and only transfer Eapol data and len to  WpaEAPOLKeyAction()*/
@@ -289,7 +286,6 @@ void STAHandleRxDataFrame(
             if (!memcmp(pRxBlk->pData, EAPOL, 2))  {
                 /* Confirm incoming is EAPOL-KEY frame */
                 if ( *(pRxBlk->pData + 3) == EAPOLKey)  {
-                    printf("EAPOL KEY +++\n");
 
                     /*pData include 2Byte Protocol type(0x888E) of 802.2 LLC header */
                     /*Only transfer Eapol data and len to  WpaEAPOLKeyAction()*/
@@ -360,12 +356,10 @@ void STAHandleRxMgmtFrame(
             if (pRxBlk->pRxINFO->U2M) {
                 if (pRxBlk->pHeader->FC.SubType == SUBTYPE_DEAUTH) {
                     //keep awake
-                    //printf("PeerDeauthAction2\n");
                     wifi_state_chg(WIFI_STATE_INIT, 0);
                 }
                 if (pRxBlk->pHeader->FC.SubType == SUBTYPE_DISASSOC) {
                     //keep awake
-                    //printf("PeerDISASSOCAction2\n");
                     PeerDisassocAction(pRxBlk,
                                        pRxBlk->pData,
                                        pRxBlk->DataSize,
@@ -375,7 +369,6 @@ void STAHandleRxMgmtFrame(
 
             if (pRxBlk->pRxINFO->MyBss) {
                 if (pRxBlk->pHeader->FC.SubType == SUBTYPE_BEACON) {
-                    //printf("beacon received,time:%d\n",kal_get_systime());
                     /* Go initial state if the PrimaryCH information in receiving Beacon is not equal to current primary channel*/
                     if (PeerBeaconCHInfoParse(pRxBlk)) {
                         RestartBCNTimer();
@@ -641,7 +634,6 @@ NDIS_STATUS RTMPRawDataSanity(
     IN    RX_BLK* pRxBlk)
 {
     if ((pRxBlk->pHeader->FC.SubType & 0x04))  { // bit 2 : no DATA
-        printf("no data +++\n");
         return NDIS_STATUS_FAILURE;
     }
 
@@ -663,13 +655,11 @@ NDIS_STATUS RTMPRawDataSanity(
         // skip HTC contorl field
         pRxBlk->pData += 4;
         pRxBlk->DataSize -= 4;
-        printf("+++HTC \n");
     }
     if (pRxBlk->pRxINFO->L2PAD) {
         // because DataSize excluding HW padding
         RX_BLK_SET_FLAG(pRxBlk, fRX_PAD);
         pRxBlk->pData += 2;
-        printf("+++Padd \n");
     }
 
     /* Skip LLC header */
@@ -681,7 +671,6 @@ NDIS_STATUS RTMPRawDataSanity(
     } else {
         /* Drop data LLC not match.  */
         /* this is for drop data not descrypted correctly by me */
-        printf("LLC not match\n");
         return NDIS_STATUS_FAILURE;
     }
     return NDIS_STATUS_FAILURE;
@@ -707,12 +696,10 @@ NDIS_STATUS    RTMPCheckRxError(
     uint8     bUnicast;
 
     if (pRxINFO == NULL) {
-        printf("pRxINFO is NULL \n");
         return (NDIS_STATUS_FAILURE);
     }
     /* Phy errors & CRC errors */
     if (pRxINFO->Crc) {
-        printf("+++ Crc error \n");
         return (NDIS_STATUS_FAILURE);
     }
     /* drop MIC / ICV error */
@@ -1108,7 +1095,6 @@ int AP_Legacy_Frame_Forward_Tx(
     if ((pRxBlk->pHeader->Addr3[0] & 0x1) == 0) { /*not multicast/broadcast frame*/
         /*if the DA is not in the MACEntery Table or this DA secureport is not open,  give up forwarding */
         if ((pEntry == NULL) || (pEntry->PortSecured == WPA_802_1X_PORT_NOT_SECURED)) {
-            printf("%s,%d  not legal Entry, give up forwarding \n", __FUNCTION__,__LINE__);
             return NDIS_STATUS_FAILURE;
         }
     }
@@ -1116,7 +1102,6 @@ int AP_Legacy_Frame_Forward_Tx(
     //handle_FCE_TxTS_interrupt();
     pBufDesc = apiQU_Dequeue(&gFreeQueue2);
     if (pBufDesc == NULL) {
-        printf("dequeue fail\n");
         return NDIS_STATUS_FAILURE;
     }
 
@@ -1405,8 +1390,6 @@ bool PeerBeaconCHInfoParse(RX_BLK* pRxBlk)
     SECURITY_IE             SecurityInfo;
     bool            flag = FALSE;
 
-    printf("PeerBeaconCHInfo: seq=%d \n",pRxBlk->pHeader->Sequence);
-
     NdisZeroMemory(Ssid, MAX_LEN_OF_SSID+1); /* the last byte '\0' for debug */
     Ssid[MAX_LEN_OF_SSID] = '\0';
     pFrame = (PFRAME_802_11) pRxBlk->pData;
@@ -1452,8 +1435,6 @@ bool PeerBeaconCHInfoParse(RX_BLK* pRxBlk)
     if (AddHtInfoLen) {
         if ((pIoTStaCfg->ExtChanOffset != AddHtInfo.AddHtInfo.ExtChanOffset)  ||
             (pIoTStaCfg->Cfg_Channel != get_cent_ch_by_htinfo(&AddHtInfo, &HtCapability))) {
-            printf("Return False: ExtCH=%d, PrimaryCH=%d \n",
-                   AddHtInfo.AddHtInfo.ExtChanOffset, AddHtInfo.ControlChan);
             return FALSE;
         }
     }
@@ -1476,8 +1457,6 @@ bool PeerBeaconCHInfoParse(RX_BLK* pRxBlk)
 #endif
 
         if ((ret != 0) && (ret != AddHtInfo.ControlChan)) {
-            printf("Return False: ExtCH=%d, PrimaryCH=%d \n",
-                   AddHtInfo.AddHtInfo.ExtChanOffset, AddHtInfo.ControlChan);
             return FALSE;
         }
     }

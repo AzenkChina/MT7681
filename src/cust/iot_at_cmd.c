@@ -677,7 +677,6 @@ int16 iot_exec_atcmd_conf_softap(puchar pCmdBuf, int16 AtCmdLen)
     memset(argv,0,4*MAX_OPTION_COUNT);
     split_string_cmd(pCmdBuf, AtCmdLen, &argc, argv);
 
-    //printf("argc3:%d,%s,%s\n",argc,argv[0],argv[1]);
     optind = 1;
     optarg = NULL;
 
@@ -743,6 +742,100 @@ int16 iot_exec_atcmd_conf_softap(puchar pCmdBuf, int16 AtCmdLen)
 
     if (UpdateCfg)
         iot_apcfg_update(SSID, Auth_Mode, Password, Channel);
+
+    return 0;
+}
+#endif
+
+#if (ATCMD_STA_SUPPORT == 1)
+/*========================================================================
+    Routine    Description:
+        iot_exec_atcmd_conf_sta --  set sta configration
+
+    Arguments:
+    Return Value: 0 is success
+    Note:
+    example1: AT#StaConf -sMT7681New1231 -a7 -p87654321
+    example2: AT#StaConf -m0          //store current STA cfg to flash
+    example3: AT#StaConf -d0           //clean current STA cfg on the flash
+========================================================================*/
+int16 iot_exec_atcmd_conf_sta(puchar pCmdBuf, int16 AtCmdLen)
+{
+    int16 argc = 0;
+    char *argv[MAX_OPTION_COUNT];
+    char *opString = "s:a:p:m:d:?";
+    int opt;
+    char *endptr = NULL;
+
+    uint8 SSID[MAX_SSID_PASS_LEN+1] = {0};
+    uint8 Password[MAX_SSID_PASS_LEN+1] = {0};
+    uint8 Auth_Mode = 0;
+    uint8 Channel = 0;
+    uint32 SSIDLen = 0;
+    uint32 PSWLen = 0;
+    bool UpdateCfg = TRUE;
+
+    memset(argv,0,4*MAX_OPTION_COUNT);
+    split_string_cmd(pCmdBuf, AtCmdLen, &argc, argv);
+
+    optind = 1;
+    optarg = NULL;
+
+    opt = getopt(argc, argv, opString);
+
+    while (opt != -1) {
+        switch (opt) {
+            case 's':
+                if (optarg == NULL)
+                    break;
+                
+                SSIDLen = strlen(optarg);
+                if (SSIDLen > MAX_SSID_PASS_LEN) {
+                    return -1;
+                }
+                memcpy(SSID, optarg, SSIDLen);
+                SSID[SSIDLen] ='\0';
+                printf_high("AT#SSID:[%s], Len = %d\n",SSID, strlen(optarg));
+                break;
+            case 'a':  /*only support 0=OPEN, 4=WPAPSK, 7=WPA2PSK, 9=WPA/WPA2PSK*/
+                if (optarg == NULL)
+                    break;
+                
+                if (strlen(optarg) > MAX_AUTH_MODE_LEN) {
+                    return -2;
+                }
+                Auth_Mode = (uint8)simple_strtol(optarg,&endptr,0);
+                printf_high("AT#Auth_Mode:%d\n",Auth_Mode);
+                break;
+            case 'p':
+                if (optarg == NULL)
+                    break;
+                
+                PSWLen = strlen(optarg);
+                if (PSWLen > MAX_SSID_PASS_LEN) {
+                    return -3;
+                }
+                memcpy(Password, optarg, PSWLen);
+                Password[PSWLen] ='\0';
+                printf_high("AT#Password:%s\n",Password);
+                break;
+            case 'm':
+                UpdateCfg = FALSE;
+                store_sta_cfg();
+                break;
+            case 'd':
+                UpdateCfg = FALSE;
+                reset_sta_cfg();
+                break;
+            case '?':
+            default:
+                break;
+        }
+        opt = getopt(argc, argv, opString);
+    }
+
+    if (UpdateCfg)
+        iot_stacfg_update(SSID, Auth_Mode, Password);
 
     return 0;
 }
@@ -861,6 +954,20 @@ int16 iot_atcmd_parser(puchar cmd_buf, int16 AtCmdLen)
             printf_high("Config SoftAP fail: %d\n", ret_code);
     }
 #endif
+#if    (ATCMD_STA_SUPPORT == 1) && (ATCMD_SUPPORT == 1)
+    /* Format:    AT#StaConf -s[ssid] -a[auth_mode] -p[password]+enter*/
+    /*                 now, only support Open mode without password */
+    /* Format:    AT#StaConf -m1+enter    --->store current AP setting to flash*/
+    /* Format:    AT#StaConf -d1+enter     --->clear AP setting in flash*/
+    else if (!memcmp(cmd_buf,AT_CMD_STA_CFG, sizeof(AT_CMD_STA_CFG)-1)) {
+        ret_code = iot_exec_atcmd_conf_sta(cmd_buf, AtCmdLen);
+
+        if (ret_code == 0)
+            printf_high("Config Sta success\n");
+        else
+            printf_high("Config Sta fail: %d\n", ret_code);
+    }
+#endif
 #if (ATCMD_FLASH_SUPPORT == 1)
     /* Format:    AT#FLASH -r6 +enter*/
     /* Format:    AT#FLASH -s6 -v56+enter*/
@@ -891,9 +998,11 @@ int16 iot_atcmd_parser(puchar cmd_buf, int16 AtCmdLen)
         ret_code = iot_exec_atcmd_uart(cmd_buf, AtCmdLen);
     }
 #if (ATCMD_RECOVERY_SUPPORT==0)
+    /* Format:    AT#CMD +enter*/
     else if (!memcmp(cmd_buf,AT_CMD_CMD,sizeof(AT_CMD_CMD)-1)) {
         iot_at_command_switch(TRUE);
     }
+    /* Format:    AT#DATA +enter*/
     else if (!memcmp(cmd_buf,AT_CMD_DATA,sizeof(AT_CMD_DATA)-1)) {
         iot_at_command_switch(FALSE);
     }
@@ -922,10 +1031,10 @@ int16 iot_atcmd_parser(puchar cmd_buf, int16 AtCmdLen)
 
 #if (ATCMD_SW_SUPPORT == 1)
     /* Format:    AT#AP+enter */
-    /* Format:    AT#STA+enter */
     else if (!memcmp(cmd_buf,AT_CMD_AP,sizeof(AT_CMD_AP)-1)) {
         iot_switch_to_ap();
     }
+    /* Format:    AT#STA+enter */
     else if (!memcmp(cmd_buf,AT_CMD_STA,sizeof(AT_CMD_STA)-1)) {
         iot_switch_to_sta();
     }

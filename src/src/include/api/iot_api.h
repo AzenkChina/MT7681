@@ -492,6 +492,7 @@ extern uint8 gCurrentAddress[MAC_ADDR_LEN];
 
 #define MAX_TCP_DATA        16
 #define MAX_IP_STRING_LEN    16
+#define MAX_SSID_LEN        32
 #define MAX_SSID_PASS_LEN    32
 #define MAX_AUTH_MODE_LEN    16
 

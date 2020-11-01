@@ -207,7 +207,6 @@ send_discover(void)
 {
     u8_t *end;
     struct dhcp_msg *m = (struct dhcp_msg *)uip_appdata;
-    printf("dhcp TX DIS\n");
     create_msg(m);
 
     end = add_msg_type(&m->options[4], DHCPDISCOVER);
@@ -226,7 +225,6 @@ send_request(void)
 {
     u8_t *end;
     struct dhcp_msg *m = (struct dhcp_msg *)uip_appdata;
-    printf("dhcp TX REQ\n");
     create_msg(m);
 
     end = add_msg_type(&m->options[4], DHCPREQUEST);
@@ -318,7 +316,6 @@ _handle_dhcp(void)
             break;
         case STATE_SEND_DIS:
             if (uip_newdata() && parse_msg() == DHCPOFFER) {
-                printf("dhcp RX offer\n");
                 s.state = STATE_OFFER_RECEIVED;
             } else if (timer_expired(&s.timer)) {
                 send_discover();
@@ -340,7 +337,6 @@ _handle_dhcp(void)
             break;
         case STATE_SEND_REQ:
             if (uip_newdata() && parse_msg() == DHCPACK) {
-                printf("dhcp RX ACK\n");
                 s.state = STATE_CONFIG_RECEIVED;
 
                 lease_time = ntohs(s.lease_time[0])*65536ul + ntohs(s.lease_time[1]);
@@ -350,15 +346,6 @@ _handle_dhcp(void)
                 printf_high("Got IP:%d.%d.%d.%d\n",
                             uip_ipaddr1(s.ipaddr), uip_ipaddr2(s.ipaddr),
                             uip_ipaddr3(s.ipaddr), uip_ipaddr4(s.ipaddr));
-                printf("Got netmask %d.%d.%d.%d\n",
-                       uip_ipaddr1(s.netmask), uip_ipaddr2(s.netmask),
-                       uip_ipaddr3(s.netmask), uip_ipaddr4(s.netmask));
-                printf("Got DNS server %d.%d.%d.%d\n",
-                       uip_ipaddr1(s.dnsaddr), uip_ipaddr2(s.dnsaddr),
-                       uip_ipaddr3(s.dnsaddr), uip_ipaddr4(s.dnsaddr));
-                printf("Got default router %d.%d.%d.%d\n",
-                       uip_ipaddr1(s.default_router), uip_ipaddr2(s.default_router),
-                       uip_ipaddr3(s.default_router), uip_ipaddr4(s.default_router));
 
                 dhcpc_configured(&s);
 
@@ -383,7 +370,6 @@ _handle_dhcp(void)
     if (uip_poll())  {
         if (lease_time_flag) {
             if (timer_expired(&s.lease_timer)) {
-                printf("dhcp lease timer timeout.time:%d\n", GetMsTimer());
                 timer_reset(&s.lease_timer);
                 s.state = STATE_SEND_REQ;
                 send_request();
@@ -480,7 +466,6 @@ void ws_got_ip(void)
 void ws_got_ip_fail(void)
 {
 #ifdef CONFIG_STATION
-    printf("ws_got_ip_fail \n");
     iot_linkdown(REASON_DEAUTH_STA_LEAVING);
 #endif
 }

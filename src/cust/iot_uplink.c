@@ -195,12 +195,10 @@ void iot_udp_pkt_send( puchar pSrcAddr,
     pUdppseudohdr->check[1] =0;
 
     //puchar a=(puchar)(&Udppseudohdr.saddr);
-    //printf("pUdppseudohdr->source_port:%x\n",pUdppseudohdr->source_port);
     iot_udp_cksum((puchar)pUdppseudohdr,sizeof(struct udppseudohdr),pPayload, PayloadLen,checksum);
 
     pUdpHdr->check[0] = checksum[0];
     pUdpHdr->check[1] = checksum[1];
-    //printf("Len:%d",PayloadLen);
     //    memcpy(pIotpkt, pPayload, PayloadLen);
     memcpy(pIotpkt, pPayload, PayloadLen);
 
@@ -244,11 +242,6 @@ int32 iot_udp_pkt_send_direct(uip_ipaddr_t *DstAddr,
 
     if (!DstAddr || !DstMAC || !pPayload)
         return 1;
-
-    printf("%s,%d, DstIP:[%d.%d.%d.%d], SrcPort[%d],DstPort[%d],PayloadLen[%d]\n",
-           __FUNCTION__,__LINE__,
-           uip_ipaddr1(DstAddr),uip_ipaddr2(DstAddr),
-           uip_ipaddr3(DstAddr),uip_ipaddr4(DstAddr),SrcPort,DstPort,PayloadLen);
 
     pBufDesc = apiQU_Dequeue(&gFreeQueue2);
     if (pBufDesc ==NULL) {

@@ -30,15 +30,12 @@ bool load_ap_cfg(void)
     bool bFlashInit = FALSE;
     printf_high("load_ap_cfg \n");
 
-#if (ENABLE_FLASH_SETTING == 1)
     /* read settings stored on flash STA CONFIG BLOCK */
     spi_flash_read(FLASH_OFFSET_AP_CFG_START, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
-    //dump(IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
 
     if (IoTpAd.flash_rw_buf[FLASH_AP_CFG_INFO_STORED] == AP_INFO_STORED) {
         /*Bssid shall be loaded from EEPROM region */
         //memcpy(pIoTApCfg->MBSSID.Bssid,         &IoTpAd.flash_rw_buf[FLASH_AP_CFG_BSSID],        FLASH_AP_CFG_BSSID_LEN);
-
         memcpy(pIoTApCfg->MBSSID.Ssid,          &IoTpAd.flash_rw_buf[FLASH_AP_CFG_SSID],        FLASH_AP_CFG_SSID_LEN);
         memcpy(&pIoTApCfg->CommonCfg.BeaconPeriod,&IoTpAd.flash_rw_buf[FLASH_AP_CFG_BCN_INTERVAL],FLASH_AP_CFG_BCN_INTERVAL_LEN);
         memcpy(pIoTApCfg->MBSSID.Passphase,    &IoTpAd.flash_rw_buf[FLASH_AP_CFG_PASSPHASE],    FLASH_AP_CFG_PASSPHASE_LEN);
@@ -52,7 +49,6 @@ bool load_ap_cfg(void)
 
         bFlashInit = TRUE;    /*if has valid setting in flash,  direct go Scan state, but not do smart connect*/
     }
-#endif
 
     return bFlashInit;
 }
@@ -101,17 +97,13 @@ int32 iot_ap_init(void)
 {
     NDIS_STATUS     Status = NDIS_STATUS_SUCCESS;
 
-    printf("---> iot_ap_init\n");
-
     iot_apcfg_preinit();
 
 #ifdef BNC_UPDATE_PERIOD /*Default turn off,  will cause system halt*/
     cnmTimerInitTimer(&pAd.ApCfg.CommonCfg.BeaconUpdateTimer, BeaconUpdateExec, 0, 0);
 #endif
     if (load_ap_cfg() == FALSE) {
-#if (ENABLE_FLASH_SETTING == 1)
         store_ap_cfg();
-#endif
     }
 
     switch (pIoTApCfg->CommonCfg.PhyMode) {
@@ -209,8 +201,6 @@ void iot_apcfg_preinit(void)
 {
     uint32 i=0;
     uint8 apmode = DEFAULT_AP_MODE;
-
-    printf("--> iot_apcfg_preinit\n");
 
     NdisMoveMemory(pIoTApCfg->MBSSID.Ssid, Default_Ssid, sizeof(Default_Ssid)-1 );
     pIoTApCfg->MBSSID.Ssid[MAX_LEN_OF_SSID]    = '\0';

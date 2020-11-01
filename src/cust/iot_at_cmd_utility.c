@@ -51,7 +51,6 @@ void split_string_cmd(puchar string_cmd, int16 cmdlen, int16 *pargc, char **argv
     argv[0] = (char *)&string_cmd[0];
     int16 argc = 1;
     int16 i=0;
-    //printf("split_string_cmd1:%s\n", string_cmd);
 
     /*move to split_string_cmd for code slim*/
     optind = 1;
@@ -68,7 +67,6 @@ void split_string_cmd(puchar string_cmd, int16 cmdlen, int16 *pargc, char **argv
     }
     *pargc=argc;
 
-    //printf("split_string_cmd2:%s,%s,%s,%s\n", argv[0], argv[1],argv[2],argv[3]);
     return;
 }
 

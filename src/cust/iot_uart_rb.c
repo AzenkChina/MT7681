@@ -404,13 +404,11 @@ int32 iot_atcmd_uart_atcfg(puchar pCmdBuf, int16 AtCmdLen)
             case 'b':
                 num = simple_strtol(optarg,&endptr,10);
                 DCBUser->baud= (uint32)num;
-                //printf("1:%s,%d\n",optarg,num);
                 IoTpAd.ComCfg.UART_Baudrate = num;
                 UART_SetDCBConfig(DCBUser);
                 break;
             case 'w':
                 num = simple_strtol(optarg,&endptr,10);
-                //printf("2:%s\n",optarg);
                 DCBUser->dataBits = num;
                 IoTpAd.ComCfg.UART_DataBits = num;
                 UART_SetDCBConfig(DCBUser);
@@ -420,14 +418,12 @@ int32 iot_atcmd_uart_atcfg(puchar pCmdBuf, int16 AtCmdLen)
                 DCBUser->parity = num;
                 IoTpAd.ComCfg.UART_Parity = num;
                 UART_SetDCBConfig(DCBUser);
-                //printf("3:%s\n",optarg);
                 break;
             case 's':
                 num = simple_strtol(optarg,&endptr,10);
                 DCBUser->stopBits = num;
                 IoTpAd.ComCfg.UART_StopBits = num;
                 UART_SetDCBConfig(DCBUser);
-                //printf("4:%s\n",optarg);
                 break;
             case '?':
             default:

@@ -356,7 +356,6 @@ int32 iot_app_proc_pkt(
 
     ProtocolHeader = (IoTCtrlProtocolHeader *)packet;
     Dataheader = (DataHeader *)(packet+CP_HDR_LEN);
-    //printf("rawpacketlength:%d\n",rawpacketlength);
     appLen = rawpacketlength;
     //printf_high("iot_app_proc_pkt\n");
     if (rawpacketlength <= 4)

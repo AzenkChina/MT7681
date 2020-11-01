@@ -320,17 +320,12 @@ void ws_init(OUT bool *pb_enable)
 
     pIoTMlme->ValidFlashStaCfg = load_sta_cfg();
 
-    /* The entry for customization */
-    if (IoTCustOp.IoTCustWifiSMInit != NULL) {
-        IoTCustOp.IoTCustWifiSMInit();
+    if (pIoTMlme->ValidFlashStaCfg != TRUE)  {
+        store_sta_cfg();
+        
     }
 
-    if ((pIoTMlme->ValidFlashStaCfg == TRUE) && (pIoTMlme->ATSetSmnt == FALSE))  {
-        wifi_state_chg(WIFI_STATE_SCAN, SCAN_STA_IDLE);
-    } else  {
-        /*if pIoTMlme->ATSetSmnt = TRUE,  go to smart connection state*/
-        ws_goto_smnt();
-    }
+    wifi_state_chg(WIFI_STATE_SCAN, SCAN_STA_IDLE);
 }
 
 /*========================================================================
@@ -405,12 +400,19 @@ void ws_connected(OUT bool *pb_enable)
 bool load_sta_cfg(void)
 {
     bool bFlashInit = FALSE;
+
+    printf_high("load_sta_cfg \n");
+
+	memcpy(pIoTStaCfg->Bssid, "\x11\x22\x33\x44\x55\x66", strlen("\x11\x22\x33\x44\x55\x66"));
+	memcpy(pIoTStaCfg->Ssid, "DLMSniffer", (strlen("DLMSniffer") + 1));
+	pIoTStaCfg->SsidLen = strlen("DLMSniffer");
+	memcpy(pIoTStaCfg->Passphase, "12345678", (strlen("12345678") + 1));
+	pIoTStaCfg->PassphaseLen = strlen("12345678");
+	pIoTStaCfg->AuthMode = Ndis802_11AuthModeWPA1PSKWPA2PSK;
     
-#if (ENABLE_FLASH_SETTING == 1)
     /* read settings stored on flash STA CONFIG BLOCK */
     //memset(IoTpAd.flash_rw_buf, 0, sizeof(IoTpAd.flash_rw_buf));
     spi_flash_read(FLASH_OFFSET_STA_CFG_START, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
-    //dump(IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
 
     /*use stored flag to shrink code size*/
     if (IoTpAd.flash_rw_buf[FLASH_STA_CFG_SMNT_INFO_STORED] == SMNT_INFO_STORED)  {
@@ -430,16 +432,6 @@ bool load_sta_cfg(void)
 
         bFlashInit = TRUE;    /*if has valid setting in flash,  direct go Scan state, but not do smart connect*/
     }
-#else
-	memcpy(pIoTStaCfg->Bssid, "\x11\x22\x33\x44\x55\x66", strlen("\x11\x22\x33\x44\x55\x66"));
-	memcpy(pIoTStaCfg->Ssid, "DLMSniffer", (strlen("DLMSniffer") + 1));
-	pIoTStaCfg->SsidLen = strlen("DLMSniffer");
-	memcpy(pIoTStaCfg->Passphase, "12345678", (strlen("12345678") + 1));
-	pIoTStaCfg->PassphaseLen = strlen("12345678");
-	pIoTStaCfg->AuthMode = Ndis802_11AuthModeWPA1PSKWPA2PSK;
-
-	bFlashInit = TRUE;    /*if has valid setting in flash,  direct go Scan state, but not do smart connect*/
-#endif
 
     return bFlashInit;
 }
@@ -453,7 +445,7 @@ bool load_sta_cfg(void)
 ========================================================================*/
 void store_sta_cfg(void)
 {
-    //printf_high("store_sta_cfg \n");
+    printf_high("store_sta_cfg \n");
 
     /*for shrink code size ,  current we only use 256Byte for  STA_CFG sector */
     memset(IoTpAd.flash_rw_buf, 0xff, sizeof(IoTpAd.flash_rw_buf));
@@ -471,13 +463,58 @@ void store_sta_cfg(void)
     IoTpAd.flash_rw_buf[FLASH_STA_CFG_PASSPHASELEN] = pIoTStaCfg->PassphaseLen;
     IoTpAd.flash_rw_buf[FLASH_STA_CFG_AUTH_MODE]     = pIoTStaCfg->AuthMode;
 
-
     /*Indicate the smart connection info already be stored on flash
        and not do smart connection while IoT device power on, but go
        to SCAN state with the infor stored on flash     */
     IoTpAd.flash_rw_buf[FLASH_STA_CFG_SMNT_INFO_STORED] = SMNT_INFO_STORED;
 
     spi_flash_write(FLASH_STA_CFG_BASE, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
+}
+
+/*========================================================================
+    Routine    Description:
+        iot_stacfg_update
+
+    Arguments:
+    Return Value:
+========================================================================*/
+void iot_stacfg_update(uint8 *pSSID, uint8 AuthMode, uint8 *pPassword)
+{
+    uint8 SSIDLen=0, PSWLen=0;
+
+    /*update ssid*/
+    if (NULL != pSSID) {
+        SSIDLen = (uint8)strlen((char*)pSSID);
+        if (SSIDLen != 0) {
+            if (SSIDLen > MAX_SSID_LEN) {
+                SSIDLen = MAX_SSID_LEN;
+            }
+            pIoTStaCfg->SsidLen = SSIDLen;
+            NdisMoveMemory(pIoTStaCfg->Ssid, pSSID, SSIDLen);
+        }
+    }
+
+    /*updata authmode*/
+    if (AuthMode < Ndis802_11AuthModeMax) {
+        pIoTStaCfg->AuthMode = AuthMode;
+    }
+
+    /*updata password*/
+    if (NULL != pPassword) {
+        PSWLen = strlen((char*)pPassword);
+        if (PSWLen != 0) {
+            if (PSWLen > MAX_SSID_PASS_LEN) {
+                PSWLen = MAX_SSID_PASS_LEN;
+            }
+            pIoTStaCfg->PassphaseLen= PSWLen;
+
+            NdisZeroMemory(pIoTStaCfg->Passphase, sizeof(pIoTStaCfg->Passphase));
+            NdisMoveMemory(pIoTStaCfg->Passphase, pPassword, PSWLen);
+
+            //printf_high("%s %d PassphaseLen= %d \n",__FUNCTION__,__LINE__,pIoTStaCfg->PassphaseLen);
+            //dump(pIoTStaCfg->Passphase, pIoTStaCfg->PassphaseLen);
+        }
+    }
 }
 
 #endif //#ifdef CONFIG_STATION

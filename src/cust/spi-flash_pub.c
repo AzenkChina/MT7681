@@ -77,8 +77,6 @@ void spi_flash_erase_CE(void)
 {
     uint8 SR;
 
-    printf("spi_flash_erase_CE start\n");
-
     SPI_REG8(PUB_SPICMD_WR_LASTBYTE, WREN);
     WAIT_OP_DONE_PUB();
     SPI_REG8(PUB_SPICMD_WR_LASTBYTE, CE);
@@ -89,7 +87,6 @@ void spi_flash_erase_CE(void)
         SPI_REG8(PUB_SPICMD_RD_LASTBYTE, 0x00);    //read the last byte
         SR = (uint8)(SPI_READOUT() >> 24);            //status value
     } while (SR&0x01);                                //write in progress bit(whether in write status/program/erase cycle)
-    printf("spi_flash_erase_CE end\n");
 }
 
 /*************************************************
@@ -98,7 +95,6 @@ void spi_flash_erase_CE(void)
 void spi_flash_erase_sector(uint32 address)
 {
     uint8   SR;
-    printf("spi_flash_erase_sector start\n");
     
     /*in changlist98520, if do Offline from Data Cmd "CONTROL_CLIENT_OFFLINE_REQUEST",  system halt*/
     /*in changlist104708, if AT cmd  AT#SoftAPConf -d1+enter,  system halt*/
@@ -107,7 +103,6 @@ void spi_flash_erase_sector(uint32 address)
     //send spi command:write enable
     SPI_REG8(PUB_SPICMD_WR_LASTBYTE, WREN);
     WAIT_OP_DONE_PUB();
-    //printf("send spi cmd\n");
 
     //send spi command:erase a sector
     SPI_REG8(PUB_SPICMD_WR_BYTE, SE);
@@ -121,8 +116,6 @@ void spi_flash_erase_sector(uint32 address)
         SPI_REG8(PUB_SPICMD_RD_LASTBYTE, 0x00);
         SR = (uint8)(SPI_READOUT() >> 24);
     } while (SR & 0x01);      //write in progress bit(whether in write status/program/erase cycle)
-
-    printf("spi_flash_erase_sector done\n");
 }
 
 /**********************************************
@@ -131,12 +124,9 @@ void spi_flash_erase_sector(uint32 address)
 void spi_flash_erase_block(uint32 address)
 {
     uint8    SR;
-
-    printf("spi_flash_erase_block start\n");
     SPI_REG8(PUB_SPICMD_WR_LASTBYTE, WREN);
     WAIT_OP_DONE_PUB();
 
-    //printf("send spi cmd\n");
     SPI_REG8(PUB_SPICMD_WR_BYTE, BE);
     SPI_REG8(PUB_SPICMD_WR_BYTE, (uint8)((address>>16)&0xff));
     SPI_REG8(PUB_SPICMD_WR_BYTE, (uint8)((address>>8)&0xff));
@@ -149,7 +139,6 @@ void spi_flash_erase_block(uint32 address)
         SR = (uint8)(SPI_READOUT() >> 24);
     } while (SR & 0x01);
 
-    printf("spi_flash_erase_block done\n");
 }
 #endif
 
@@ -190,8 +179,6 @@ int32 spi_flash_read_m2(uint32 addr, uint8 *data, uint16 len)
 **********************************************/
 static void spi_flash_page_write(uint32 addr, uint8 *data, uint16 len)
 {
-    printf("%s,%d: Addr=0x%x, len=0x%x\n", __FUNCTION__,__LINE__,addr, len);
-
     //send write enable command
     SPI_REG8(PUB_SPICMD_WR_LASTBYTE, WREN);
     WAIT_OP_DONE_PUB();
@@ -222,8 +209,6 @@ int32 spi_flash_write_func(uint32 addr, uint8 *data, uint16 len)
     uint8 SR;
     uint16 first_write_len=0;  //the first spi_flash_write lenth
     uint16 max_first_write_len=0;   //the max length can been written on a page
-    
-    printf("spi_flash_write_func_pub\n");
 
     /*if the data across two flash pages, and "addr" is not the begining of one page, 
            we need split write operation into two steps:
@@ -313,9 +298,6 @@ uint8 spi_flash_update_fw(uint8 type, uint32 offset, uint8 *pdata, uint16 len)
     }
 
     crc1 = crc32(pdata, len);
-    //for(i=0; i<len; i++)
-    //  printf("0x%x ",pdata[i]);
-    printf("\nCRC1=0x%08x\n",crc1);
 
     if (offset == 0) {
         /*If  FLASH_OFFSET_UPG_FW_START  is not begining position of  a block
@@ -331,14 +313,8 @@ uint8 spi_flash_update_fw(uint8 type, uint32 offset, uint8 *pdata, uint16 len)
     spi_flash_read(RegionOffset+offset, IoTpAd.flash_rw_buf, len);
     crc2 = crc32(IoTpAd.flash_rw_buf, len);
 
-    //for(i=0; i<len; i++)
-    //  printf("0x%x ",IoTpAd.flash_rw_buf[i]);
-    printf("CRC2=0x%08x\n",crc2);
-
     if (crc1 != crc2)
         return 1;
-
-    printf("CRC is correct\n");
     return 0;
 }
 
@@ -353,8 +329,6 @@ int32 spi_flash_write(uint32 addr, uint8 *data, uint16 len)
     uint16  cplen=0 ;
     uint8   *pVaule = data;
     uint8    pRw_buf[RAM_RW_BUF_SIZE]={0xff};
-
-    printf("%s,%d: Addr=0x%x, len=0x%x\n", __FUNCTION__,__LINE__,addr, len);
 
     /* because flash write buffer size's limitation,  the len of writing data should be limited */
     if ((len == 0) || (len > FLASH_RW_BUF_SIZE))

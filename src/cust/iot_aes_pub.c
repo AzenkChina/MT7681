@@ -474,18 +474,13 @@ void aes_cbc_decrypt (
      *    - IV length must be 16 bytes(128 bits)
      */
     if ((CipherTextLength % AES_BLOCK_SIZES) != 0) {
-        printf("aes_cbc_decrypt: cipher text length is %d bytes, it can't be divided with no remainder by block size(%d).\n",
-               CipherTextLength, AES_BLOCK_SIZES);
+
         return;
     } /* End of if */
     if ((KeyLength != AES_KEY128_LENGTH) && (KeyLength != AES_KEY192_LENGTH) && (KeyLength != AES_KEY256_LENGTH)) {
-        printf("aes_cbc_decrypt: key length is %d bytes, it must be %d, %d, or %d bytes(128, 192, or 256 bits).\n",
-               KeyLength, AES_KEY128_LENGTH, AES_KEY192_LENGTH, AES_KEY256_LENGTH);
         return;
     } /* End of if */
     if (IVLength != AES_CBC_IV_LENGTH) {
-        printf("aes_cbc_decrypt: IV length is %d bytes, it must be %d bytes(128bits).\n",
-               IVLength, AES_CBC_IV_LENGTH);
         return;
     } /* End of if */
 
@@ -562,18 +557,12 @@ void aes_cbc_complete_decrypt (
      *    - IV length must be 16 bytes(128 bits)
      */
     if ((CipherTextLength % AES_BLOCK_SIZES) != 0) {
-        printf("aes_cbc_decrypt: cipher text length is %d bytes, it can't be divided with no remainder by block size(%d).\n",
-               CipherTextLength, AES_BLOCK_SIZES);
         return;
     } /* End of if */
     if ((Aes->keyLen != AES_KEY128_LENGTH) && (Aes->keyLen != AES_KEY192_LENGTH) && (Aes->keyLen != AES_KEY256_LENGTH)) {
-        printf("aes_cbc_decrypt: key length is %d bytes, it must be %d, %d, or %d bytes(128, 192, or 256 bits).\n",
-               Aes->keyLen, AES_KEY128_LENGTH, AES_KEY192_LENGTH, AES_KEY256_LENGTH);
         return;
     } /* End of if */
     if (Aes->ivLen != AES_CBC_IV_LENGTH) {
-        printf("aes_cbc_decrypt: IV length is %d bytes, it must be %d bytes(128bits).\n",
-               Aes->ivLen, AES_CBC_IV_LENGTH);
         return;
     } /* End of if */
 

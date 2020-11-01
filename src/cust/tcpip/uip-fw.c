@@ -384,9 +384,6 @@ uip_fw_output(void)
 #endif /* UIP_BROADCAST */
 
     netif = find_netif();
-    /*  printf("uip_fw_output: netif %p ->output %p len %d\n", netif,
-       netif->output,
-       uip_len);*/
 
     if (netif == NULL) {
         return UIP_FW_NOROUTE;

@@ -48,7 +48,6 @@ mt76xx_dev_send(void)
     pBufDesc = apiQU_Dequeue(&gFreeQueue2);
 
     if (pBufDesc ==NULL) {
-        printf("dequeue fail\n");
         return;
     }
 #if 0 /*for debug*/

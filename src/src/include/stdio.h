@@ -38,11 +38,7 @@ int vsprintf(char *buffer, const char *fmt, va_list args);
 int sprintf(char *buffer, const char *fmt, ...);
 int vprintf(const char *fmt, va_list args);
 
-#if ((UART_SUPPORT == 1) && (DBG_MSG == 1))
-void printf(const char *fmt, ...);
-#else
 #define printf(...)
-#endif
 
 #if (DBG_MSG_HIGH == 1)
 void printf_high(const char *fmt, ...);

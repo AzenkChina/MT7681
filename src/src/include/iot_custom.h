@@ -43,14 +43,6 @@
 #define     FW_VERISON_CUST         "DLMSConnector 1.0 r1"
 #endif
 
-
-/*whether use flash config settings(AP, STA, Common, User regions)*/
-#if (ATCMD_RECOVERY_SUPPORT == 1)
-#define ENABLE_FLASH_SETTING    (1)   //must enable it in recovery mode to read boot index
-#else
-#define ENABLE_FLASH_SETTING    (0)
-#endif
-
 /*Default setting of User Config Block*/
 #define DEFAULT_VENDOR_NEME          "Azenk"
 #define DEFAULT_PRODUCT_TYPE         "Proxy"
@@ -97,6 +89,7 @@
 #define        AT_CMD_UART                 "Uart "
 #define        AT_CMD_CHANNEL           "Channel "
 #define        AT_CMD_SOFTAP_CFG     "SoftAPConf "
+#define        AT_CMD_STA_CFG           "StaConf "
 #define        AT_CMD_VER                    "Ver"
 #define        AT_CMD_REBOOT             "Reboot"
 #define        AT_CMD_DEFAULT           "Default"
@@ -166,6 +159,7 @@ bool reset_com_cfg(bool bUpFlash) XIP_ATTRIBUTE(".xipsec0");
 void store_sta_cfg(void)        XIP_ATTRIBUTE(".xipsec0");
 bool load_sta_cfg(void)          XIP_ATTRIBUTE(".xipsec0");
 bool reset_sta_cfg(void);   /*not declare this function as XIP func, to avoid system halt*/
+void iot_stacfg_update(uint8 *pSSID, uint8 AuthMode, uint8 *pPassword)  XIP_ATTRIBUTE(".xipsec0");
 #endif
 
 bool default_boot_cfg(void) XIP_ATTRIBUTE(".xipsec0");

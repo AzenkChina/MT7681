@@ -57,24 +57,6 @@ int vprintf(const char *fmt, va_list args)
     return do_printf(fmt, args, vprintf_help, (void *)0);
 }
 
-/*Only use this function when you must output message in somewhere*/
-/*For debug usage, please use  DBGPRINT(Level, Fmt) */
-#if ((UART_SUPPORT == 1) && (DBG_MSG == 1))
-void printf(const char *fmt, ...)
-{
-#if (MTK_DEBUG_MSG_PRINT!=1) && (MT7650_DRIVER_TEST!=1)
-    va_list args;
-    int ret_val;
-
-    va_start(args, fmt);
-    ret_val = vprintf(fmt, args);
-    va_end(args);
-
-    //return ret_val;
-#endif
-}
-#endif
-
 #if (DBG_MSG_HIGH == 1)
 void printf_high(const char *fmt, ...)
 {

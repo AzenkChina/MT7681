@@ -80,7 +80,6 @@
 
 #define MAX_NUMBER_OF_MAC     3 //32    /* if MAX_MBSSID_NUM is 8, this value can't be larger than 211 */
 #define MAX_BEACON_SIZE       512
-#define MAX_SSID_LEN              32
 
 #define TBTT_PRELOAD_TIME     384 /* usec. LomgPreamble + 24-byte at 1Mbps */
 #define DEFAULT_DTIM_PERIOD   1
