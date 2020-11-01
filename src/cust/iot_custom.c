@@ -444,6 +444,12 @@ bool load_usr_cfg(void)
     /*use stored flag to shrink code size*/
     if (IoTpAd.flash_rw_buf[FLASH_USR_CFG_PRODUCT_INFO_STORED] == PRODUCT_INFO_STORED)  {
         gCommandSupport = IoTpAd.flash_rw_buf[FLASH_USR_CFG_AT_SUPPORT];
+        if(gCommandSupport) {
+            PRINT_FLAG = TRUE;
+        }
+        else {
+            PRINT_FLAG = FALSE;
+        }
     } else {
         gCommandSupport = 0xff;
         reset_usr_cfg(TRUE);
@@ -467,6 +473,8 @@ bool reset_usr_cfg(bool bUpFlash)
     spi_flash_erase_sector(FLASH_USR_CFG_BASE);
 
     memset(IoTpAd.flash_rw_buf ,0xff, sizeof(IoTpAd.flash_rw_buf));
+
+    PRINT_FLAG = TRUE;
 
     if (bUpFlash == TRUE) {
         IoTpAd.flash_rw_buf[FLASH_USR_CFG_PRODUCT_INFO_STORED] = PRODUCT_INFO_STORED;
@@ -547,6 +555,13 @@ bool load_com_cfg(void)
         IoTpAd.ComCfg.UART_DataBits    =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_UART_DATA_BITS];
         IoTpAd.ComCfg.UART_Parity     =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_UART_PARITY];
         IoTpAd.ComCfg.UART_StopBits    =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_UART_STOP_BITS];
+
+        if ((IoTpAd.ComCfg.UART_Baudrate > UART_BAUD_115200) ||
+            (IoTpAd.ComCfg.UART_Parity > pa_even) ||
+            ((IoTpAd.ComCfg.UART_DataBits < len_7) || (IoTpAd.ComCfg.UART_DataBits > len_8))  ||
+            ((IoTpAd.ComCfg.UART_StopBits < sb_1)  || (IoTpAd.ComCfg.UART_StopBits > sb_1_5)) ) {
+            default_uart_cfg();
+        }
     }
     else
     {
@@ -768,3 +783,26 @@ void iot_switch_to_ap()
 }
 #endif
 
+
+#if (ATCMD_RECOVERY_SUPPORT==0)
+void iot_at_command_switch(bool status)
+{
+    /* Notice: erase User config Flash region , default size is one sector [4KB] */
+    spi_flash_erase_sector(FLASH_USR_CFG_BASE);
+
+    memset(IoTpAd.flash_rw_buf ,0xff, sizeof(IoTpAd.flash_rw_buf));
+    IoTpAd.flash_rw_buf[FLASH_USR_CFG_PRODUCT_INFO_STORED] = PRODUCT_INFO_STORED;
+
+    if (status == TRUE) {
+        gCommandSupport = 0xff;
+        PRINT_FLAG = TRUE;
+    }
+    else {
+        gCommandSupport = 0x00;
+        PRINT_FLAG = FALSE;
+    }
+
+    IoTpAd.flash_rw_buf[FLASH_USR_CFG_AT_SUPPORT] = gCommandSupport;
+    spi_flash_write(FLASH_USR_CFG_BASE, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
+}
+#endif

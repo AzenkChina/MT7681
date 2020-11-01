@@ -1135,4 +1135,8 @@ void iot_switch_to_sta();
 void iot_switch_to_ap();
 #endif
 
+#if (ATCMD_RECOVERY_SUPPORT==0)
+void iot_at_command_switch(bool status);
+#endif
+
 #endif /*_IOT_API_H_*/

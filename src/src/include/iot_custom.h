@@ -116,6 +116,9 @@
 #define        AT_CMD_AP                      "AP"
 #define        AT_CMD_STA                    "STA"
 
+#define        AT_CMD_CMD               "CMD"
+#define        AT_CMD_DATA              "DATA"
+
 /*Default output value for GPIO0~4*/
 #define DEFAULT_GPIO04_OUTVAL            (1)
 

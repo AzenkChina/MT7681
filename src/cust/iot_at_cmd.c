@@ -890,6 +890,14 @@ int16 iot_atcmd_parser(puchar cmd_buf, int16 AtCmdLen)
     else if (!memcmp(cmd_buf,AT_CMD_UART,sizeof(AT_CMD_UART)-1)) {
         ret_code = iot_exec_atcmd_uart(cmd_buf, AtCmdLen);
     }
+#if (ATCMD_RECOVERY_SUPPORT==0)
+    else if (!memcmp(cmd_buf,AT_CMD_CMD,sizeof(AT_CMD_CMD)-1)) {
+        iot_at_command_switch(TRUE);
+    }
+    else if (!memcmp(cmd_buf,AT_CMD_DATA,sizeof(AT_CMD_DATA)-1)) {
+        iot_at_command_switch(FALSE);
+    }
+#endif
 #endif
 
     /*Only for Debug*/

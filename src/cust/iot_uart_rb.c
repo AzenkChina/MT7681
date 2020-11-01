@@ -377,15 +377,25 @@ int32 iot_atcmd_uart_atcfg(puchar pCmdBuf, int16 AtCmdLen)
 	/* read settings stored on flash Common CONFIG BLOCK */
 	spi_flash_read(FLASH_COM_CFG_BASE, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
 	if(IoTpAd.flash_rw_buf[FLASH_COM_CFG_INFO_STORED] != COMMON_INFO_STORED) {
-		memset(IoTpAd.flash_rw_buf ,0xff, sizeof(IoTpAd.flash_rw_buf));
-		default_boot_cfg();
-		default_uart_cfg();
-		default_ip_cfg();
-		IoTpAd.flash_rw_buf[FLASH_COM_CFG_INFO_STORED] = COMMON_INFO_STORED;
-		IoTpAd.flash_rw_buf[FLASH_COM_CFG_BOOT_IDX] = DEFAULT_BOOT_FW_IDX;
-		IoTpAd.flash_rw_buf[FLASH_COM_CFG_RECOVERY_MODE_STATUS] = DEFAULT_RECOVERY_MODE_STATUS;
-		IoTpAd.flash_rw_buf[FLASH_COM_CFG_IO_SET] = DEFAULT_IO_MODE;
+        reset_com_cfg(TRUE);
+        spi_flash_read(FLASH_COM_CFG_BASE, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
 	}
+
+    IoTpAd.ComCfg.BootFWIdx            =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_BOOT_IDX];
+    IoTpAd.ComCfg.RecovModeStatus     =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_RECOVERY_MODE_STATUS];
+    IoTpAd.ComCfg.IOMode            =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_IO_SET];
+
+    memcpy(&IoTpAd.ComCfg.UART_Baudrate, &IoTpAd.flash_rw_buf[FLASH_COM_CFG_UART_BAUD],   FLASH_COM_CFG_UART_BAUD_LEN);
+    IoTpAd.ComCfg.UART_DataBits    =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_UART_DATA_BITS];
+    IoTpAd.ComCfg.UART_Parity     =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_UART_PARITY];
+    IoTpAd.ComCfg.UART_StopBits    =  IoTpAd.flash_rw_buf[FLASH_COM_CFG_UART_STOP_BITS];
+
+    if ((IoTpAd.ComCfg.UART_Baudrate > UART_BAUD_115200) ||
+        (IoTpAd.ComCfg.UART_Parity > pa_even) ||
+        ((IoTpAd.ComCfg.UART_DataBits < len_7) || (IoTpAd.ComCfg.UART_DataBits > len_8))  ||
+        ((IoTpAd.ComCfg.UART_StopBits < sb_1)  || (IoTpAd.ComCfg.UART_StopBits > sb_1_5)) ) {
+        default_uart_cfg();
+    }
 
 	spi_flash_erase_sector(FLASH_COM_CFG_BASE);
 
@@ -425,6 +435,19 @@ int32 iot_atcmd_uart_atcfg(puchar pCmdBuf, int16 AtCmdLen)
         }
         opt = getopt(argc, argv, opString);
     }
+
+    if ((IoTpAd.ComCfg.UART_Baudrate > UART_BAUD_115200) ||
+        (IoTpAd.ComCfg.UART_Parity > pa_even) ||
+        ((IoTpAd.ComCfg.UART_DataBits < len_7) || (IoTpAd.ComCfg.UART_DataBits > len_8))  ||
+        ((IoTpAd.ComCfg.UART_StopBits < sb_1)  || (IoTpAd.ComCfg.UART_StopBits > sb_1_5)) ) {
+        default_uart_cfg();
+    }
+
+    IoTpAd.flash_rw_buf[FLASH_COM_CFG_INFO_STORED] = COMMON_INFO_STORED;
+    memcpy(&IoTpAd.flash_rw_buf[FLASH_COM_CFG_UART_BAUD],   &IoTpAd.ComCfg.UART_Baudrate, FLASH_COM_CFG_UART_BAUD_LEN);
+    IoTpAd.flash_rw_buf[FLASH_COM_CFG_UART_DATA_BITS]    =  IoTpAd.ComCfg.UART_DataBits;
+    IoTpAd.flash_rw_buf[FLASH_COM_CFG_UART_PARITY]     =  IoTpAd.ComCfg.UART_Parity;
+    IoTpAd.flash_rw_buf[FLASH_COM_CFG_UART_STOP_BITS]    =  IoTpAd.ComCfg.UART_StopBits;
 
 	spi_flash_write(FLASH_COM_CFG_BASE, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
 
