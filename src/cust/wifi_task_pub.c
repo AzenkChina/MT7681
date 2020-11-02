@@ -53,7 +53,7 @@ STA_ADMIN_CONFIG *pIoTStaCfg;
 #endif
 
 /*gCurrentAddress shall be set in sys_init() as the value stored in flash sta cfg region if the value in flash is valid*/
-uint8 gCurrentAddress[MAC_ADDR_LEN]    =    {0x00, 0x0c, 0x43, 0x12, 0x34, 0xf3};
+uint8 gCurrentAddress[MAC_ADDR_LEN]    =    {0x00, 0x0c, 0x43, 0x26, 0x60, 0x40};
 uint8 BCAST_ADDR[MAC_ADDR_LEN]      =     {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 
 /*****************************************************************
@@ -402,7 +402,7 @@ bool load_sta_cfg(void)
 
     printf_high("load_sta_cfg \n");
 
-	memcpy(pIoTStaCfg->Bssid, "\x11\x22\x33\x44\x55\x66", strlen("\x11\x22\x33\x44\x55\x66"));
+	memcpy(pIoTStaCfg->Bssid, "\x00\x0c\x43\x26\x60\x40", strlen("\x00\x0c\x43\x26\x60\x40"));
 	memcpy(pIoTStaCfg->Ssid, "DLMSniffer", (strlen("DLMSniffer") + 1));
 	pIoTStaCfg->SsidLen = strlen("DLMSniffer");
 	memcpy(pIoTStaCfg->Passphase, "12345678", (strlen("12345678") + 1));
@@ -472,6 +472,7 @@ void store_sta_cfg(void)
     memset(IoTpAd.flash_rw_buf, 0xff, sizeof(IoTpAd.flash_rw_buf));
     spi_flash_read(FLASH_OFFSET_EEP_CFG_START, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
     memcpy(&IoTpAd.flash_rw_buf[EEPROM_MAC_12_OFFSET],          pIoTStaCfg->Bssid,    FLASH_STA_CFG_BSSID_LEN);
+    spi_flash_erase_sector(FLASH_OFFSET_EEP_CFG_START);
     spi_flash_write(FLASH_OFFSET_EEP_CFG_START, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
 }
 

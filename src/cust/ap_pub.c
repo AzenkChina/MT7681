@@ -88,6 +88,7 @@ void store_ap_cfg(void)
     memset(IoTpAd.flash_rw_buf, 0xff, sizeof(IoTpAd.flash_rw_buf));
     spi_flash_read(FLASH_OFFSET_EEP_CFG_START, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
     memcpy(&IoTpAd.flash_rw_buf[EEPROM_MAC_12_OFFSET],          pIoTApCfg->MBSSID.Bssid,    FLASH_AP_CFG_BSSID_LEN);
+    spi_flash_erase_sector(FLASH_OFFSET_EEP_CFG_START);
     spi_flash_write(FLASH_OFFSET_EEP_CFG_START, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
 }
 
