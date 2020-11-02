@@ -7,21 +7,20 @@
 
 	Some useful AT commands:
 
-	AT#Default																--------make all parameter to default
-	AT#Reboot																--------reboot the module
-	AT#AP																	--------switch to AP mode
-	AT#STA																	--------switch to STA mode
-	AT#CMD																	--------switch to CMD mode
-	AT#DATA																	--------switch to DATA mode
+	AT#Default								--------make all parameter to default
+	AT#Reboot								--------reboot the module
+	AT#AP									--------switch to AP mode
+	AT#STA									--------switch to STA mode
+	AT#CMD									--------switch to CMD mode
+	AT#DATA									--------switch to DATA mode
+	AT#Uart -b9600 -w8 -p0 -s1						--------config the UART
 
-	AT#Uart -b9600 -w8 -p0 -s1												--------config the UART
-
-	AT#SoftAPConf -d0														--------clean current AP cfg on the flash
-	AT#SoftAPConf -sMT7681New1231 -a7 -p87654321 -c6 [-b112233445566]		--------config the AP [s=SSID a=auth p=password c=channel b=BSSID]
-	AT#SoftAPConf -m0														--------store current AP cfg to flash
+	AT#SoftAPConf -d0							--------clean current AP cfg on the flash
+	AT#SoftAPConf -sMT7681New1231 -a7 -p87654321 -c6 [-b112233445566]	--------config the AP [s=SSID a=auth p=password c=channel b=BSSID]
+	AT#SoftAPConf -m0							--------store current AP cfg to flash
 	-a0=OPEN -a4=WPAPSK -a7=WPA2PSK -a9=WPA/WPA2PSK
 
-	AT#StaConf -d0															--------clean current STA cfg on the flash
-	AT#StaConf -sMT7681New1231 -a7 -p87654321 [-b112233445566]				--------config the STA [s=SSID a=auth p=password b=BSSID]
-	AT#StaConf -m0															--------store current STA cfg to flash
+	AT#StaConf -d0								--------clean current STA cfg on the flash
+	AT#StaConf -sMT7681New1231 -a7 -p87654321 [-b112233445566]		--------config the STA [s=SSID a=auth p=password b=BSSID]
+	AT#StaConf -m0								--------store current STA cfg to flash
 	-a0=OPEN -a4=WPAPSK -a7=WPA2PSK -a9=WPA/WPA2PSK
