@@ -483,9 +483,8 @@ void iot_stacfg_update(uint8 *pBSSID, uint8 *pSSID, uint8 AuthMode, uint8 *pPass
 
     /*update bssid*/
     if (NULL != pBSSID) {
-            NdisZeroMemory(pIoTApCfg->Bssid, sizeof(pIoTApCfg->Bssid));
-            NdisMoveMemory(pIoTApCfg->Bssid, pBSSID, sizeof(pIoTApCfg->Bssid));
-        }
+            NdisZeroMemory(pIoTStaCfg->Bssid, sizeof(pIoTStaCfg->Bssid));
+            NdisMoveMemory(pIoTStaCfg->Bssid, pBSSID, sizeof(pIoTStaCfg->Bssid));
     }
 
     /*update ssid*/
