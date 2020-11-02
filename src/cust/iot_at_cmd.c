@@ -970,7 +970,7 @@ int16 iot_atcmd_parser(puchar cmd_buf, int16 AtCmdLen)
     }
 #endif
 #if    (ATCMD_SOFTAP_SUPPORT == 1) && (ATCMD_SUPPORT == 1)
-    /* Format:    AT#SoftAPConf -s[ssid] -c[channel] -a[auth_mode] -p[password]+enter*/
+    /* Format:    AT#SoftAPConf -s[ssid] -c[channel] -a[auth_mode] -p[password] -b[bssid]+enter*/
     /*                 now, only support Open mode without password */
     /* Format:    AT#SoftAPConf -m1+enter    --->store current AP setting to flash*/
     /* Format:    AT#SoftAPConf -d1+enter     --->clear AP setting in flash*/
@@ -984,7 +984,7 @@ int16 iot_atcmd_parser(puchar cmd_buf, int16 AtCmdLen)
     }
 #endif
 #if    (ATCMD_STA_SUPPORT == 1) && (ATCMD_SUPPORT == 1)
-    /* Format:    AT#StaConf -s[ssid] -a[auth_mode] -p[password]+enter*/
+    /* Format:    AT#StaConf -s[ssid] -a[auth_mode] -p[password] -b[bssid]+enter*/
     /*                 now, only support Open mode without password */
     /* Format:    AT#StaConf -m1+enter    --->store current AP setting to flash*/
     /* Format:    AT#StaConf -d1+enter     --->clear AP setting in flash*/
