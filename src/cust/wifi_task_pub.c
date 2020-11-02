@@ -468,6 +468,11 @@ void store_sta_cfg(void)
     IoTpAd.flash_rw_buf[FLASH_STA_CFG_SMNT_INFO_STORED] = SMNT_INFO_STORED;
 
     spi_flash_write(FLASH_STA_CFG_BASE, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
+
+    memset(IoTpAd.flash_rw_buf, 0xff, sizeof(IoTpAd.flash_rw_buf));
+    spi_flash_read(FLASH_OFFSET_EEP_CFG_START, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
+    memcpy(&IoTpAd.flash_rw_buf[EEPROM_MAC_12_OFFSET],          pIoTStaCfg->Bssid,    FLASH_STA_CFG_BSSID_LEN);
+    spi_flash_write(FLASH_OFFSET_EEP_CFG_START, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
 }
 
 /*========================================================================

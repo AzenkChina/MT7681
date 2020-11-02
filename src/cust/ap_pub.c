@@ -1,6 +1,7 @@
 #include "stdio.h"
 #include "rtmp_general_pub.h"
 #include "ap_pub.h"
+#include "eeprom.h"
 
 #ifdef CONFIG_SOFTAP
 
@@ -83,6 +84,11 @@ void store_ap_cfg(void)
     IoTpAd.flash_rw_buf[FLASH_AP_CFG_INFO_STORED] = AP_INFO_STORED;
 
     spi_flash_write(FLASH_OFFSET_AP_CFG_START, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
+
+    memset(IoTpAd.flash_rw_buf, 0xff, sizeof(IoTpAd.flash_rw_buf));
+    spi_flash_read(FLASH_OFFSET_EEP_CFG_START, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
+    memcpy(&IoTpAd.flash_rw_buf[EEPROM_MAC_12_OFFSET],          pIoTApCfg->MBSSID.Bssid,    FLASH_AP_CFG_BSSID_LEN);
+    spi_flash_write(FLASH_OFFSET_EEP_CFG_START, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
 }
 
 /*
