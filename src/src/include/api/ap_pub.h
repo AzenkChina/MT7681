@@ -488,7 +488,7 @@ int32 iot_ap_init(void) XIP_ATTRIBUTE(".xipsec0");
 void iot_ap_startup(void) XIP_ATTRIBUTE(".xipsec0");
 void iot_ap_pmk_set(void)  XIP_ATTRIBUTE(".xipsec0");
 void iot_apcfg_preinit(void)  XIP_ATTRIBUTE(".xipsec0");
-void iot_apcfg_update(uint8 *pSSID, uint8 AuthMode, uint8 *pPassword, uint8 Channel) XIP_ATTRIBUTE(".xipsec0");
+void iot_apcfg_update((uint8 *pBSSID, uint8 *pSSID, uint8 AuthMode, uint8 *pPassword, uint8 Channel) XIP_ATTRIBUTE(".xipsec0");
 void set_entry_phycfg(MAC_TABLE_ENTRY *pEntry) XIP_ATTRIBUTE(".xipsec0");
 void store_ap_cfg(void);
 bool reset_ap_cfg(void);

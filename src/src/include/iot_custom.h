@@ -159,7 +159,7 @@ bool reset_com_cfg(bool bUpFlash) XIP_ATTRIBUTE(".xipsec0");
 void store_sta_cfg(void)        XIP_ATTRIBUTE(".xipsec0");
 bool load_sta_cfg(void)          XIP_ATTRIBUTE(".xipsec0");
 bool reset_sta_cfg(void);   /*not declare this function as XIP func, to avoid system halt*/
-void iot_stacfg_update(uint8 *pSSID, uint8 AuthMode, uint8 *pPassword)  XIP_ATTRIBUTE(".xipsec0");
+void iot_stacfg_update(uint8 *pBSSID, uint8 *pSSID, uint8 AuthMode, uint8 *pPassword)  XIP_ATTRIBUTE(".xipsec0");
 #endif
 
 bool default_boot_cfg(void) XIP_ATTRIBUTE(".xipsec0");

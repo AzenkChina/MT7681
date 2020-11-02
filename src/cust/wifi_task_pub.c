@@ -408,7 +408,7 @@ bool load_sta_cfg(void)
 	memcpy(pIoTStaCfg->Passphase, "12345678", (strlen("12345678") + 1));
 	pIoTStaCfg->PassphaseLen = strlen("12345678");
 	pIoTStaCfg->AuthMode = Ndis802_11AuthModeWPA1PSKWPA2PSK;
-    
+
     /* read settings stored on flash STA CONFIG BLOCK */
     //memset(IoTpAd.flash_rw_buf, 0, sizeof(IoTpAd.flash_rw_buf));
     spi_flash_read(FLASH_OFFSET_STA_CFG_START, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
@@ -477,9 +477,16 @@ void store_sta_cfg(void)
     Arguments:
     Return Value:
 ========================================================================*/
-void iot_stacfg_update(uint8 *pSSID, uint8 AuthMode, uint8 *pPassword)
+void iot_stacfg_update(uint8 *pBSSID, uint8 *pSSID, uint8 AuthMode, uint8 *pPassword)
 {
     uint8 SSIDLen=0, PSWLen=0;
+
+    /*update bssid*/
+    if (NULL != pBSSID) {
+            NdisZeroMemory(pIoTApCfg->Bssid, sizeof(pIoTApCfg->Bssid));
+            NdisMoveMemory(pIoTApCfg->Bssid, pBSSID, sizeof(pIoTApCfg->Bssid));
+        }
+    }
 
     /*update ssid*/
     if (NULL != pSSID) {

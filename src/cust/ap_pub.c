@@ -34,8 +34,7 @@ bool load_ap_cfg(void)
     spi_flash_read(FLASH_OFFSET_AP_CFG_START, IoTpAd.flash_rw_buf, sizeof(IoTpAd.flash_rw_buf));
 
     if (IoTpAd.flash_rw_buf[FLASH_AP_CFG_INFO_STORED] == AP_INFO_STORED) {
-        /*Bssid shall be loaded from EEPROM region */
-        //memcpy(pIoTApCfg->MBSSID.Bssid,         &IoTpAd.flash_rw_buf[FLASH_AP_CFG_BSSID],        FLASH_AP_CFG_BSSID_LEN);
+        memcpy(pIoTApCfg->MBSSID.Bssid,         &IoTpAd.flash_rw_buf[FLASH_AP_CFG_BSSID],        FLASH_AP_CFG_BSSID_LEN);
         memcpy(pIoTApCfg->MBSSID.Ssid,          &IoTpAd.flash_rw_buf[FLASH_AP_CFG_SSID],        FLASH_AP_CFG_SSID_LEN);
         memcpy(&pIoTApCfg->CommonCfg.BeaconPeriod,&IoTpAd.flash_rw_buf[FLASH_AP_CFG_BCN_INTERVAL],FLASH_AP_CFG_BCN_INTERVAL_LEN);
         memcpy(pIoTApCfg->MBSSID.Passphase,    &IoTpAd.flash_rw_buf[FLASH_AP_CFG_PASSPHASE],    FLASH_AP_CFG_PASSPHASE_LEN);
@@ -67,7 +66,7 @@ void store_ap_cfg(void)
     /*for shrink code size ,  current we only use 256Byte for  AP_CFG sector */
     memset(IoTpAd.flash_rw_buf, 0xff, sizeof(IoTpAd.flash_rw_buf));
 
-    //memcpy(&IoTpAd.flash_rw_buf[FLASH_AP_CFG_BSSID],          pIoTApCfg->MBSSID.Bssid,    FLASH_AP_CFG_BSSID_LEN);
+    memcpy(&IoTpAd.flash_rw_buf[FLASH_AP_CFG_BSSID],          pIoTApCfg->MBSSID.Bssid,    FLASH_AP_CFG_BSSID_LEN);
     memcpy(&IoTpAd.flash_rw_buf[FLASH_AP_CFG_SSID],             pIoTApCfg->MBSSID.Ssid,     FLASH_AP_CFG_SSID_LEN);
     memcpy(&IoTpAd.flash_rw_buf[FLASH_AP_CFG_BCN_INTERVAL], &pIoTApCfg->CommonCfg.BeaconPeriod,     FLASH_AP_CFG_BCN_INTERVAL_LEN);
     memcpy(&IoTpAd.flash_rw_buf[FLASH_AP_CFG_PASSPHASE], &pIoTApCfg->MBSSID.Passphase,     FLASH_AP_CFG_PASSPHASE_LEN);
@@ -284,9 +283,16 @@ void iot_apcfg_preinit(void)
 
 }
 
-void iot_apcfg_update(uint8 *pSSID, uint8 AuthMode, uint8 *pPassword, uint8 Channel)
+void iot_apcfg_update(uint8 *pBSSID, uint8 *pSSID, uint8 AuthMode, uint8 *pPassword, uint8 Channel)
 {
     uint8 SSIDLen=0, PSWLen=0;
+
+    /*update bssid*/
+    if (NULL != pBSSID) {
+            NdisZeroMemory(pIoTApCfg->MBSSID.Bssid, sizeof(pIoTApCfg->MBSSID.Bssid));
+            NdisMoveMemory(pIoTApCfg->MBSSID.Bssid, pBSSID, sizeof(pIoTApCfg->MBSSID.Bssid));
+        }
+    }
 
     /*update ssid*/
     if (NULL != pSSID) {

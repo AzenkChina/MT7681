@@ -623,7 +623,7 @@ int16 iot_exec_atcmd_ch_switch(puchar pCmdBuf, int16 AtCmdLen)
     Arguments:
     Return Value: 0 is success
     Note:
-    example1: AT#SoftAPConf -sMT7681New1231 -a7 -p87654321 -c6
+    example1: AT#SoftAPConf -sMT7681New1231 -a7 -p87654321 -c6 [-b112233445566]
     example2: AT#SoftAPConf -m0          //store current AP cfg to flash
     example3: AT#SoftAPConf -d0           //clean current AP cfg on the flash
 ========================================================================*/
@@ -631,17 +631,21 @@ int16 iot_exec_atcmd_conf_softap(puchar pCmdBuf, int16 AtCmdLen)
 {
     int16 argc = 0;
     char *argv[MAX_OPTION_COUNT];
-    char *opString = "s:c:a:p:m:d:?";
+    char *opString = "s:c:a:p:b:m:d:?";
     int opt;
     char *endptr = NULL;
 
     uint8 SSID[MAX_SSID_PASS_LEN+1] = {0};
     uint8 Password[MAX_SSID_PASS_LEN+1] = {0};
+    uint8 Bssid[MAC_ADDR_LEN]= {0};
     uint8 Auth_Mode = 0;
     uint8 Channel = 0;
     uint32 SSIDLen = 0;
     uint32 PSWLen = 0;
+    uint32 BssidLen = 0;
     bool UpdateCfg = TRUE;
+    char BS[3] = {0};
+    uint8 i;
 
     memset(argv,0,4*MAX_OPTION_COUNT);
     split_string_cmd(pCmdBuf, AtCmdLen, &argc, argv);
@@ -686,6 +690,27 @@ int16 iot_exec_atcmd_conf_softap(puchar pCmdBuf, int16 AtCmdLen)
                 memcpy(Password, optarg, PSWLen);
                 Password[PSWLen] ='\0';
                 printf_high("AT#Password:%s\n",Password);
+                break;
+            case 'b':
+                if (optarg == NULL)
+                    break;
+                
+                BssidLen = strlen(optarg);
+                if (BssidLen < (2*MAC_ADDR_LEN)) {
+                    return -3;
+                }
+                
+                for(i=0; i<MAC_ADDR_LEN; i++) {
+                    BS[0] = optarg[i*2+0];
+                    BS[1] = optarg[i*2+1];
+                    BS[2] = '\0';
+                    Bssid[i] = (uint8)simple_strtol(BS,&endptr,16);
+                }
+                printf_high("AT#BSSID:");
+                for(i=0; i<MAC_ADDR_LEN; i++) {
+                    printf_high("%02x",(Bssid[i] & 0xff));
+                }
+                printf_high("\n");
                 break;
             case 'c':
                 if (optarg == NULL)
@@ -709,8 +734,14 @@ int16 iot_exec_atcmd_conf_softap(puchar pCmdBuf, int16 AtCmdLen)
         opt = getopt(argc, argv, opString);
     }
 
-    if (UpdateCfg)
-        iot_apcfg_update(SSID, Auth_Mode, Password, Channel);
+    if (UpdateCfg) {
+        if (BssidLen >= (2*MAC_ADDR_LEN)) {
+            iot_apcfg_update(Bssid, SSID, Auth_Mode, Password, Channel);
+        }
+	else {
+            iot_apcfg_update(NULL, SSID, Auth_Mode, Password, Channel);
+        }
+    }
 
     return 0;
 }
@@ -724,7 +755,7 @@ int16 iot_exec_atcmd_conf_softap(puchar pCmdBuf, int16 AtCmdLen)
     Arguments:
     Return Value: 0 is success
     Note:
-    example1: AT#StaConf -sMT7681New1231 -a7 -p87654321
+    example1: AT#StaConf -sMT7681New1231 -a7 -p87654321 [-b112233445566]
     example2: AT#StaConf -m0          //store current STA cfg to flash
     example3: AT#StaConf -d0           //clean current STA cfg on the flash
 ========================================================================*/
@@ -732,17 +763,21 @@ int16 iot_exec_atcmd_conf_sta(puchar pCmdBuf, int16 AtCmdLen)
 {
     int16 argc = 0;
     char *argv[MAX_OPTION_COUNT];
-    char *opString = "s:a:p:m:d:?";
+    char *opString = "s:a:p:b:m:d:?";
     int opt;
     char *endptr = NULL;
 
     uint8 SSID[MAX_SSID_PASS_LEN+1] = {0};
     uint8 Password[MAX_SSID_PASS_LEN+1] = {0};
+    uint8 Bssid[MAC_ADDR_LEN]= {0};
     uint8 Auth_Mode = 0;
     uint8 Channel = 0;
     uint32 SSIDLen = 0;
     uint32 PSWLen = 0;
+    uint32 BssidLen = 0;
     bool UpdateCfg = TRUE;
+    char BS[3] = {0};
+    uint8 i;
 
     memset(argv,0,4*MAX_OPTION_COUNT);
     split_string_cmd(pCmdBuf, AtCmdLen, &argc, argv);
@@ -788,6 +823,27 @@ int16 iot_exec_atcmd_conf_sta(puchar pCmdBuf, int16 AtCmdLen)
                 Password[PSWLen] ='\0';
                 printf_high("AT#Password:%s\n",Password);
                 break;
+            case 'b':
+                if (optarg == NULL)
+                    break;
+                
+                BssidLen = strlen(optarg);
+                if (BssidLen < (2*MAC_ADDR_LEN)) {
+                    return -3;
+                }
+                
+                for(i=0; i<MAC_ADDR_LEN; i++) {
+                    BS[0] = optarg[i*2+0];
+                    BS[1] = optarg[i*2+1];
+                    BS[2] = '\0';
+                    Bssid[i] = (uint8)simple_strtol(BS,&endptr,16);
+                }
+                printf_high("AT#BSSID:");
+                for(i=0; i<MAC_ADDR_LEN; i++) {
+                    printf_high("%02x",(Bssid[i] & 0xff));
+                }
+                printf_high("\n");
+                break;
             case 'm':
                 UpdateCfg = FALSE;
                 store_sta_cfg();
@@ -803,8 +859,14 @@ int16 iot_exec_atcmd_conf_sta(puchar pCmdBuf, int16 AtCmdLen)
         opt = getopt(argc, argv, opString);
     }
 
-    if (UpdateCfg)
-        iot_stacfg_update(SSID, Auth_Mode, Password);
+    if (UpdateCfg) {
+        if (BssidLen >= (2*MAC_ADDR_LEN)) {
+            iot_stacfg_update(Bssid, SSID, Auth_Mode, Password);
+        }
+	else {
+            iot_stacfg_update(NULL, SSID, Auth_Mode, Password);
+        }
+    }
 
     return 0;
 }
