@@ -291,7 +291,6 @@ void iot_apcfg_update(uint8 *pBSSID, uint8 *pSSID, uint8 AuthMode, uint8 *pPassw
     if (NULL != pBSSID) {
             NdisZeroMemory(pIoTApCfg->MBSSID.Bssid, sizeof(pIoTApCfg->MBSSID.Bssid));
             NdisMoveMemory(pIoTApCfg->MBSSID.Bssid, pBSSID, sizeof(pIoTApCfg->MBSSID.Bssid));
-        }
     }
 
     /*update ssid*/
