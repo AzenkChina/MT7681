@@ -42,6 +42,10 @@ char ATCmdPrefixAT[] = AT_CMD_PREFIX;
 char ATCmdPrefixIW[] = AT_CMD_PREFIX2;
 extern bool UART_TX_POLL_ENABLE;
 
+#if (ATCMD_RECOVERY_SUPPORT==0)
+extern volatile uint8 gCommandSupport;
+#endif
+
 /**************************************************************************/
 /**************************************************************************/
 void uart_rxbuf_init(UARTStruct *qp)
@@ -64,9 +68,6 @@ int16 iot_uart_output (uint8 *msg, int16 count)
 {
 
     if ((msg == NULL) || (count <= 0))   {
-#if (ATCMD_SUPPORT != 0)
-        printf_high("%s,%d: invalid input \n",__FUNCTION__,__LINE__);
-#endif
         return 0;
     }
     return uart_put_bytes(msg,(uint16)count);
@@ -174,11 +175,13 @@ void uart_rx_cb(void)
      * MCU only forward uart rx data to client
      * here,copy to rx ring and return
      */
-#if (ATCMD_SUPPORT == 0)
-    while (uart_get_byte(&ch)) {
-        Buf_Push(rx_ring,ch);
-    }
-    return;
+ #if (ATCMD_RECOVERY_SUPPORT==0)
+	if(gCommandSupport == 0) {
+	    while (uart_get_byte(&ch)) {
+	        Buf_Push(rx_ring,ch);
+	    }
+	    return;
+	}
 #endif
 
     /*
