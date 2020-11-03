@@ -271,8 +271,8 @@ void handle_tcp_srv_app3(void)
 
     if (uip_poll()) {
 		cptr = (char *)uip_appdata;
-		iot_gpio_input((int32)0, &gpio_set);
-		iot_gpio_input((int32)1, &gpio_event);
+		iot_gpio_input((int32)0, &gpio_event);
+		iot_gpio_input((int32)1, &gpio_set);
 		if((gpio_set != set) || (gpio_event != event) || timer_expired(&user_timer)) {
 			set = gpio_set;
 			event = gpio_event;
