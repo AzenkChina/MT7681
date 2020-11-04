@@ -2,7 +2,7 @@
 
 	This module act as a tcp server, it listens on three tcp ports: 4059, 4060 and 9998.
 	Port 4059 will passthrough all data between UART and tcp connect in DATA mode, and useless in CMD mode.
-	Port 4060 will send out the status(messages like S0E0 or S1E0) of the set pin(gpio0) & event pin(gpio1), also, it can control(control command is STA0 & STA1) the sta pin(gpio2).
+	Port 4060 will send out the status(messages like S0E0R0 or S1E0R1) of the set pin(gpio1), event pin(gpio0) & reset pin(gpio3), also, it can control(control command is STA0 & STA1) the sta pin(gpio2).
 	Port 9998 is to send command when the module is in DATA mode.
 
 	Some useful AT commands:

@@ -247,11 +247,11 @@ void handle_tcp_srv_app2(void)
 #if TCP_SRV_APP3_ENABLE
 void handle_tcp_srv_app3(void)
 {
-	static uint8  set=0, event=0;
+	static uint8  set=0, event=0, reset=0;
 	static uint8 sta = 0xff;
 	static struct timer user_timer;
 	char *cptr;
-	uint32 gpio_set, gpio_event;
+	uint32 gpio_set, gpio_event, gpio_reset;
 
     if (uip_newdata()) {
         sta = 0xff;
@@ -269,20 +269,24 @@ void handle_tcp_srv_app3(void)
         }
     }
 
+	iot_gpio_output(3,  1);
+
     if (uip_poll()) {
 		cptr = (char *)uip_appdata;
 		iot_gpio_input((int32)0, &gpio_event);
 		iot_gpio_input((int32)1, &gpio_set);
-		if((gpio_set != set) || (gpio_event != event) || timer_expired(&user_timer)) {
+		iot_gpio_input((int32)3, &gpio_reset);
+		if((gpio_set != set) || (gpio_event != event) || (gpio_reset != reset) || timer_expired(&user_timer)) {
 			set = gpio_set;
 			event = gpio_event;
-			sprintf(uip_appdata, "S%cE%c\n", (set?'1':'0'), (event?'1':'0'));
-			uip_send(uip_appdata, (strlen("S0E0\n")+1));
+			reset = gpio_reset;
+			sprintf(cptr, "S%cE%cR%c\n", (set?'1':'0'), (event?'1':'0'), (reset?'1':'0'));
+			uip_send(cptr, (strlen("S0E0R0\n")+1));
 			timer_set(&user_timer, 5*CLOCK_SECOND);
 		}
         else if(sta != 0xff) {
-            sprintf(uip_appdata, "STA%c\n", (sta?'1':'0'));
-            uip_send(uip_appdata, (strlen("STA0\n")+1));
+            sprintf(cptr, "STA%c\n", (sta?'1':'0'));
+            uip_send(cptr, (strlen("STA0\n")+1));
             sta = 0xff;
         }
     }
