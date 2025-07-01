@@ -22,7 +22,7 @@
   Defination
 ******************************************************************/
 #define SYS_SIG_WIFI_IDLE_REQ    (uint32)(1UL << 9)
-
+#define STA_FALLBACK_TIME        (uint32)(30*60*1000)
 
 /*****************************************************************
   Extern Paramter
@@ -230,7 +230,24 @@ bool check_data_valid(puchar pdata, uint16 len)
 void wifi_state_machine(void)
 {
 #ifdef CONFIG_STATION
+    static uint32 PreTime = 0;
+    static uint32 AccTime = 0;
+    uint32 CurTime;
     bool b_doRx = FALSE;     /*not use and move wifi_rx_proc() before wifi_state_machine() to fix Dequeue fail*/
+
+    CurTime = iot_get_ms_time();
+    if (pIoTMlme->CurrentWifiState != WIFI_STATE_CONNED) {
+        if ((CurTime > PreTime) && (CurTime - PreTime) < 2000) {
+            AccTime += (CurTime - PreTime);
+        }
+        if (AccTime > STA_FALLBACK_TIME) {
+            iot_switch_to_ap();
+        }
+    }
+    else {
+        AccTime = 0;
+    }
+    PreTime = CurTime;
 
     switch (pIoTMlme->CurrentWifiState) {
         case WIFI_STATE_INIT:
